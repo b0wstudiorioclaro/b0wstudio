@@ -52,6 +52,7 @@ Dados observados no formulário:
 
 - Nome.
 - Nome da empresa.
+- E-mail para contato.
 - Serviços de interesse.
 - Texto livre sobre o negócio.
 

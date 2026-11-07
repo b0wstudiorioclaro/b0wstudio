@@ -671,6 +671,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (submitButton.disabled) return;
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
@@ -682,8 +683,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const formData = new FormData(form);
       const selectedServices = serviceInputs.filter((input) => input.checked).map((input) => input.value);
+      const company = formData.get("Empresa").trim();
+      const email = formData.get("email").trim();
+      const message = formData.get("Sobre o negócio").trim();
+      formData.set("Nome", formData.get("Nome").trim());
+      formData.set("Empresa", company);
+      formData.set("email", email);
+      formData.set("_replyto", email);
+      formData.set("_subject", `B0w Studio | Novo projeto — ${company.replace(/[\r\n]+/g, " ").slice(0, 100)}`);
+      // Keep the email easy to scan: contact, services, then the project brief.
       formData.delete("Serviços[]");
+      formData.delete("Sobre o negócio");
       formData.append("Serviços desejados", selectedServices.join(", "));
+      formData.append("Sobre o negócio", message);
       submitButton.disabled = true;
       submitButton.classList.remove("is-success");
       submitButton.classList.add("is-loading");
@@ -693,14 +705,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       status.textContent = "";
       status.className = "contact-form-status";
 
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 30000);
       try {
-        const response = await fetch("https://formsubmit.co/ajax/bowstudiorioclaro@gmail.com", {
+        const endpoint = form.action.replace("https://formsubmit.co/", "https://formsubmit.co/ajax/");
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { Accept: "application/json" },
-          body: formData
+          body: formData,
+          signal: controller.signal
         });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok || result.success === false || result.success === "false") throw new Error("Falha no envio");
+        const result = await response.json();
+        if (!response.ok || (result?.success !== true && result?.success !== "true")) throw new Error("Falha no envio");
 
         form.reset();
         validateServices(false);
@@ -717,8 +733,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         submitButton.removeAttribute("aria-busy");
         submitButton.removeAttribute("aria-label");
         submitLabel.textContent = "Tentar novamente";
-        status.textContent = "Não foi possível enviar agora. Tente novamente ou fale pelo WhatsApp.";
+        status.textContent = error.name === "AbortError"
+          ? "O envio demorou mais que o esperado e não conseguimos confirmar o recebimento. Seus dados continuam aqui. Tente novamente ou fale pelo WhatsApp."
+          : "Não foi possível confirmar o envio. Seus dados continuam aqui. Tente novamente ou fale pelo WhatsApp.";
         status.classList.add("is-error");
+      } finally {
+        window.clearTimeout(timeout);
       }
     });
   }

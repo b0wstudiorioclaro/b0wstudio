@@ -271,21 +271,27 @@
           <aside class="contact-panel">
             <h3 class="contact-panel-title">Pronto para ELEVAR a sua marca?</h3>
             <form class="contact-form" action="https://formsubmit.co/bowstudiorioclaro@gmail.com" method="POST" data-contact-form>
-              <input type="hidden" name="_subject" value="Novo projeto pelo site B0w Studio">
-              <input type="hidden" name="_template" value="table">
+              <input type="hidden" name="_subject" value="B0w Studio | Novo projeto pelo site">
+              <input type="hidden" name="_template" value="box">
+              <input type="hidden" name="_url" value="https://bowstudio.com.br/">
               <input type="hidden" name="_captcha" value="false">
               <input class="contact-honeypot" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
 
               <div class="contact-fields">
                 <label class="contact-field">
                   <span>Nome</span>
-                  <input type="text" name="Nome" placeholder="Como podemos te chamar?" autocomplete="name" required>
+                  <input type="text" name="Nome" placeholder="Como podemos te chamar?" autocomplete="name" maxlength="120" required>
                 </label>
                 <label class="contact-field">
                   <span>Nome da empresa</span>
-                  <input type="text" name="Empresa" placeholder="Qual é a sua marca?" autocomplete="organization" required>
+                  <input type="text" name="Empresa" placeholder="Qual é a sua marca?" autocomplete="organization" maxlength="160" required>
                 </label>
               </div>
+
+              <label class="contact-field">
+                <span>E-mail para contato</span>
+                <input type="email" name="email" placeholder="Onde podemos te responder?" autocomplete="email" maxlength="254" required>
+              </label>
 
               <fieldset class="contact-services" aria-describedby="services-error">
                 <legend>Selecione aqui o serviço desejado <span>Marque quantos quiser</span></legend>
@@ -301,14 +307,14 @@
 
               <label class="contact-field contact-field-message">
                 <span>Descreva o seu negócio</span>
-                <textarea name="Sobre o negócio" rows="3" placeholder="Conte um pouco sobre o momento da sua marca e o que você deseja construir." required></textarea>
+                <textarea name="Sobre o negócio" rows="3" placeholder="Conte um pouco sobre o momento da sua marca e o que você deseja construir." maxlength="5000" required></textarea>
               </label>
 
               <p class="contact-privacy-note">Ao enviar, seus dados serão usados para responder ao seu contato conforme a <button type="button" data-legal-open="privacy">Política de Privacidade</button>.</p>
               <button class="contact-primary" type="submit"><span data-submit-label>Enviar projeto</span><span class="contact-submit-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path class="contact-submit-arrow" d="M4.5 10h10m-4-4 4 4-4 4"/><path class="contact-submit-check" d="m4.8 10.2 3.1 3.1 7.2-7.1"/></svg></span></button>
               <p class="contact-form-status" role="status" aria-live="polite"></p>
             </form>
-            <a class="contact-whatsapp" href="https://wa.me/?text=Ol%C3%A1%2C%20B0w%20Studio!%20Tenho%20um%20projeto%20em%20mente." target="_blank" rel="noopener noreferrer">
+            <a class="contact-whatsapp" href="https://wa.me/5519998157374?text=Ol%C3%A1%2C%20B0w%20Studio!%20Tenho%20um%20projeto%20em%20mente." target="_blank" rel="noopener noreferrer" aria-label="Chamar no WhatsApp: (19) 99815-7374">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.075-.792.372-.273.297-1.04 1.016-1.04 2.479s1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.693.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414-.074-.123-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.981.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.895 6.994c-.003 5.45-4.437 9.885-9.887 9.885m8.413-18.297A11.815 11.815 0 0 0 12.055 0C5.495 0 .16 5.335.157 11.893c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.558 0 11.894-5.336 11.897-11.893a11.821 11.821 0 0 0-3.483-8.413Z"/></svg>
               <span>Chamar direto no WhatsApp</span>
               <i aria-hidden="true">↗</i>
@@ -371,7 +377,7 @@
         <p>Assuntos de privacidade podem ser enviados para <a href="mailto:bowstudiorioclaro@gmail.com">bowstudiorioclaro@gmail.com</a>.</p>
 
         <h3>2. Dados tratados</h3>
-        <p>O formulário coleta nome, nome da empresa, serviços de interesse e a mensagem enviada. Ao acessar o site, fornecedores técnicos podem receber dados de conexão necessários à entrega do conteúdo, como endereço IP, tipo de navegador, data, horário e registros técnicos de segurança. A B0w Studio não solicita dados sensíveis neste formulário.</p>
+        <p>O formulário coleta nome, nome da empresa, e-mail para contato, serviços de interesse e a mensagem enviada. Ao acessar o site, fornecedores técnicos podem receber dados de conexão necessários à entrega do conteúdo, como endereço IP, tipo de navegador, data, horário e registros técnicos de segurança. A B0w Studio não solicita dados sensíveis neste formulário.</p>
 
         <h3>3. Finalidades e bases legais</h3>
         <p>Os dados do formulário são usados para responder ao contato, compreender a demanda e realizar procedimentos preliminares relacionados a uma possível contratação. O funcionamento seguro do site e a prevenção de abuso podem se apoiar no legítimo interesse, respeitados os direitos do titular. Qualquer rastreamento opcional que venha a ser adicionado dependerá de consentimento quando exigido.</p>
