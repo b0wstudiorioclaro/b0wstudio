@@ -736,21 +736,51 @@ document.addEventListener("DOMContentLoaded", async () => {
     let savedScrollY = 0;
     let closeTimer = 0;
 
-    const readPreferences = () => {
+    const parsePreferences = (raw) => {
       try {
-        const saved = JSON.parse(window.localStorage.getItem(storageKey) || "null");
-        return saved && saved.version === 1 ? { ...defaults, ...saved, necessary: true } : { ...defaults };
+        const saved = JSON.parse(raw || "null");
+        return saved?.version === 1 && ["analytics", "functional", "marketing"].every((category) => typeof saved[category] === "boolean")
+          ? { ...defaults, ...saved, necessary: true } : null;
       } catch (error) {
-        return { ...defaults };
+        return null;
       }
     };
 
-    const hasStoredPreferences = () => {
+    const readCookie = () => {
       try {
-        return window.localStorage.getItem(storageKey) !== null;
+        const entry = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${storageKey}=`));
+        return entry ? decodeURIComponent(entry.slice(storageKey.length + 1)) : null;
       } catch (error) {
-        return false;
+        return null;
       }
+    };
+
+    const readStoredPreferences = () => {
+      let local = null;
+      try { local = parsePreferences(window.localStorage.getItem(storageKey)); } catch (error) { /* Cookies can still be available. */ }
+      const cookie = parsePreferences(readCookie());
+      if (!local) return cookie;
+      if (!cookie) return local;
+      return (Date.parse(cookie.updatedAt) || 0) >= (Date.parse(local.updatedAt) || 0) ? cookie : local;
+    };
+
+    const readPreferences = () => readStoredPreferences() || { ...defaults };
+    const hasStoredPreferences = () => Boolean(readStoredPreferences());
+
+    const persistPreferences = (value) => {
+      const serialized = JSON.stringify(value);
+      let localSaved = false;
+      let cookieSaved = false;
+      try {
+        window.localStorage.setItem(storageKey, serialized);
+        localSaved = window.localStorage.getItem(storageKey) === serialized;
+      } catch (error) { /* Fall back to the necessary preference cookie. */ }
+      try {
+        const secure = window.location.protocol === "https:" ? "; Secure" : "";
+        document.cookie = `${storageKey}=${encodeURIComponent(serialized)}; Max-Age=15552000; Path=/; SameSite=Lax${secure}`;
+        cookieSaved = readCookie() === serialized;
+      } catch (error) { /* Local storage can still preserve the choice. */ }
+      return localSaved || cookieSaved;
     };
 
     const showCookieBanner = () => {
@@ -876,16 +906,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const cookieForm = document.querySelector("[data-cookie-form]");
     const cookieStatus = document.querySelector("[data-cookie-status]");
+    const cookieBannerStatus = document.querySelector("[data-cookie-banner-status]");
     const savePreferences = (preferences, message) => {
       const value = { ...defaults, ...preferences, necessary: true, version: 1, updatedAt: new Date().toISOString() };
+      if (!persistPreferences(value)) {
+        const errorMessage = "Não foi possível salvar sua escolha. Permita cookies ou armazenamento local para este site e tente novamente.";
+        if (cookieStatus) cookieStatus.textContent = errorMessage;
+        if (cookieBannerStatus) cookieBannerStatus.textContent = errorMessage;
+        return;
+      }
+      if (cookieStatus) cookieStatus.textContent = message;
+      if (cookieBannerStatus) cookieBannerStatus.textContent = "";
+      hideCookieBanner();
+      window.dispatchEvent(new CustomEvent("b0w:consent-updated", { detail: { ...value } }));
       try {
-        window.localStorage.setItem(storageKey, JSON.stringify(value));
         activateConsentedScripts(value);
-        window.dispatchEvent(new CustomEvent("b0w:consent-updated", { detail: { ...value } }));
-        if (cookieStatus) cookieStatus.textContent = message;
-        hideCookieBanner();
       } catch (error) {
-        if (cookieStatus) cookieStatus.textContent = "Não foi possível salvar neste navegador. Verifique as configurações de armazenamento local.";
+        console.error("As preferências foram salvas, mas uma integração opcional não pôde ser iniciada.", error);
       }
     };
 
@@ -917,6 +954,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     const initialPreferences = syncPreferenceControls();
+    // Also register existing local-only choices as a persistent cookie.
+    if (hasStoredPreferences()) persistPreferences(initialPreferences);
     activateConsentedScripts(initialPreferences);
     window.B0wConsent = Object.freeze({
       get: () => ({ ...readPreferences() }),
