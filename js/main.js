@@ -736,8 +736,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       submitButton.disabled = true;
       submitButton.classList.add("is-loading");
       submitButton.setAttribute("aria-busy", "true");
-      submitLabel.textContent = "Enviando projeto";
-      status.className = "contact-form-status";
+      submitLabel.textContent = "Enviando seu projeto…";
+      status.className = "contact-form-status is-visually-hidden";
       status.textContent = "Enviando seu projeto…";
       const controller = new AbortController();
       const timeout = window.setTimeout(() => controller.abort(), 30000);
@@ -763,7 +763,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         success.focus({ preventScroll: true });
       } catch (error) {
         submitLabel.textContent = "Tentar novamente";
-        status.classList.add("is-error");
+        status.className = "contact-form-status is-error";
         status.textContent = error.name === "AbortError"
           ? "O envio demorou mais que o esperado. Não conseguimos confirmar o recebimento. Seus dados continuam aqui; tente novamente ou fale pelo WhatsApp."
           : "Não foi possível confirmar o envio. Seus dados continuam aqui; tente novamente ou fale pelo WhatsApp.";

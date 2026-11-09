@@ -395,8 +395,8 @@ html.legal-scroll-locked,body.legal-modal-open{overflow:hidden;overscroll-behavi
 .case-tag.is-light span{border-color:rgba(255,255,255,.62);background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(255,255,255,.38)),rgba(235,240,245,.48);color:var(--ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 .8rem 2.4rem rgba(0,0,0,.16)}.case-tag.is-light i{border-color:rgba(0,0,0,.08);background:rgba(255,255,255,.34)}
 
 /* Contact submit states */
-.contact-primary{position:relative;min-height:3.15rem;transition:background-color .35s,color .35s}.contact-primary.is-loading{justify-content:center}.contact-primary.is-loading>span{opacity:0}.contact-primary.is-loading::after{position:absolute;top:50%;left:50%;width:1.05rem;height:1.05rem;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;content:"";transform:translate(-50%,-50%);animation:contact-submit-spin .75s linear infinite}.contact-form .contact-primary.is-loading:disabled,.contact-form .contact-primary.is-success:disabled{opacity:1}.contact-primary.is-success{background:#173d27;text-transform:none;letter-spacing:.035em}.contact-primary.is-success span:first-child{font-weight:600}.contact-primary.is-success span:last-child{font-size:.9rem}.is-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-@keyframes contact-submit-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.contact-primary{position:relative;min-height:3.15rem;transition:background-color .35s,color .35s}.contact-form .contact-primary.is-loading{justify-content:center;gap:.7rem;text-transform:none;letter-spacing:0}.contact-primary.is-loading>span{opacity:1}.contact-primary.is-loading .contact-submit-icon{display:none}.contact-primary.is-loading::after{display:block;flex:0 0 1.05rem;width:1.05rem;height:1.05rem;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;content:"";animation:contact-submit-spin .75s linear infinite}.contact-form .contact-primary.is-loading:disabled,.contact-form .contact-primary.is-success:disabled{opacity:1}.contact-primary.is-success{background:#173d27;text-transform:none;letter-spacing:.035em}.contact-primary.is-success span:first-child{font-weight:600}.contact-primary.is-success span:last-child{font-size:.9rem}.is-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+@keyframes contact-submit-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.contact-primary.is-loading::after{animation:none;border-color:#fff}}
 
 /* Contact success refinement */
@@ -411,6 +411,7 @@ html.legal-scroll-locked,body.legal-modal-open{overflow:hidden;overscroll-behavi
 .contact-success[hidden]{display:none!important}
 .contact-form.is-submitted{min-height:30rem;align-content:center}
 .contact-form.is-submitted>:not(.contact-success){display:none!important}
+.contact-form.is-submitted+.contact-whatsapp{display:none!important}
 .contact-success{padding:1.5rem .25rem;text-align:center;outline:none;animation:contact-success-enter .65s var(--ease) both}
 .contact-success-art{position:relative;display:grid;width:8rem;height:8rem;place-items:center;margin:0 auto 1.5rem}
 .contact-success-disc{display:grid;width:5.5rem;height:5.5rem;place-items:center;border-radius:50%;background:#101413;box-shadow:0 .7rem 2rem rgba(16,20,19,.12);animation:contact-success-pop .7s cubic-bezier(.2,1.4,.4,1) both}
