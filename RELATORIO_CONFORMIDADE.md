@@ -1,113 +1,69 @@
-# Relatório de conformidade da landing page B0w Studio
+# Revisão de segurança e publicação — B0w Studio
 
-Atualização: 28 de outubro de 2026
+Data: 9 de novembro de 2026.
 
-## Escopo verificado
+## Resultado e limites
 
-Revisão estática dos arquivos `index.html`, `css/style.css`, `js/main.js`, `js/hero3d.js` e `js/symbol.js` no projeto local. Não houve acesso a domínio ou infraestrutura de produção durante esta revisão.
+Não foram encontrados segredos privados nos arquivos atuais revisados nem um fluxo observado que insira conteúdo do visitante como HTML executável. Foram aplicados reforços no código local. Isso não é uma certificação de segurança ou de conformidade jurídica.
 
-Este relatório registra medidas técnicas implementadas e pendências. Ele não representa certificação jurídica, declaração de conformidade integral com a LGPD ou auditoria formal de segurança.
+Escopo: HTML, JavaScript, CSS, SVGs locais, formulário, armazenamento de preferências, dependências externas e consultas públicas somente de leitura ao domínio. Não foram auditados acessos administrativos, histórico completo do Git, infraestrutura interna do FormSubmit, caixa de e-mail, backups ou todos os protocolos TLS. Não houve teste de invasão ou teste visual completo no navegador nesta revisão.
 
-## Alterações implementadas
+As alterações locais precisam ser publicadas. Os cabeçalhos consultados são da versão que já estava no ar.
 
-- Quatro links jurídicos discretos foram adicionados ao rodapé: Política de Privacidade, Termos de Serviço, Política de Cookies e Preferências de Cookies.
-- Os quatro conteúdos abrem em modais na própria landing page, sem nova rota e sem mudança de URL.
-- Os modais usam `role="dialog"`, `aria-modal="true"` e associação de título com `aria-labelledby`.
-- Foram implementados fechamento por botão, tecla Escape e clique no fundo da sobreposição.
-- Foi implementado bloqueio do scroll de fundo, preservação da posição de rolagem, restauração do foco e focus trap para navegação por teclado.
-- As animações dos modais respeitam `prefers-reduced-motion`.
-- O formulário agora exibe aviso de privacidade com acesso direto à política.
-- As preferências de cookies são funcionais e armazenadas no navegador sob a chave `b0w_cookie_preferences_v1`.
-- Um banner de consentimento é exibido quando ainda não existe uma escolha armazenada, com ações para aceitar todas as categorias, recusar opcionais ou abrir o gerenciamento detalhado.
-- Categorias opcionais permanecem desativadas por padrão.
-- Foi implementado um mecanismo de bloqueio para scripts marcados com `type="text/plain"` e `data-consent-category`. Esses scripts somente são ativados após autorização armazenada para a categoria correspondente.
-- Foi adicionada a política de referência `strict-origin-when-cross-origin`.
-- A marca textual foi mantida como B0w Studio. A logomarca e os arquivos gráficos originais não foram modificados.
+## Verificações realizadas
 
-## Auditoria de cookies, tracking e terceiros
+| Item | Resultado observado |
+| --- | --- |
+| HTTPS | `https://bowstudio.com.br/` respondeu 200; validação padrão do certificado pelo curl passou, sem ignorar erros TLS. |
+| HTTP | Redirecionamento 301 para HTTPS. |
+| Arquivos sensíveis públicos | `/.env` e `/.git/config` responderam 404. Somente esses dois caminhos foram verificados. |
+| Credenciais no código atual | Nenhuma senha, chave privada ou credencial secreta identificada na busca. A chave pública do Web3Forms não está mais no HTML. |
+| Scripts | Three.js 0.128.0 e GSAP 3.15.1, incluindo os plugins. URLs exatas, SHA-384 calculado dos arquivos baixados e `crossorigin="anonymous"`. |
+| Avisos conhecidos | Consulta OSV para `npm:three@0.128.0` e `npm:gsap@3.15.1` retornou resultados vazios. Ausência de avisos na base não garante ausência de falhas. |
+| CDN | Os oito scripts retornaram arquivos com sucesso e cabeçalho CORS permitindo a verificação SRI. |
+| Links externos | WhatsApp e Instagram usam HTTPS e `noopener noreferrer` ao abrir uma nova aba. |
+| Dados do contato | Nome, empresa, e-mail, serviços e descrição; POST direto para FormSubmit. O código próprio não grava esses dados em cookies ou localStorage. |
+| Preferências | Cookie necessário com `SameSite=Lax`, `Secure` em HTTPS e validade de 180 dias, além de localStorage. Não contém dados do formulário. |
+| Rastreamento | Nenhum Google Analytics, Meta Pixel ou outro script opcional ativo identificado no código próprio. Terceiros podem receber dados técnicos nas requisições. |
 
-Não foram encontrados no código atual:
+## Reforços aplicados
 
-- Google Analytics.
-- Google Tag Manager.
-- Meta Pixel.
-- Scripts próprios de remarketing.
-- Cookies próprios definidos por JavaScript.
+- Verificação de integridade SRI nos scripts externos em `index.html` e `404.html`.
+- GSAP fixado em 3.15.1, versão resolvida pelo endereço 3.15 durante a revisão. Three.js mantido em 0.128.0 para preservar compatibilidade.
+- CSP por meta com `base-uri 'none'`, `object-src 'none'` e `upgrade-insecure-requests`. Na home, `form-action` permite apenas a própria origem e `https://formsubmit.co`; na 404, nenhum formulário.
+- Esta CSP é parcial: não restringe todas as fontes de scripts e não substitui uma política completa contra XSS. A restrição de base impede a alteração do destino relativo por uma tag base injetada.
+- CAPTCHA do FormSubmit ativado (`_captcha=true`) e honeypot preservado. A confirmação antispam acontece na página do provedor.
+- Fragmentos de URL são tratados como IDs, com proteção contra codificação inválida, em vez de passados diretamente a um seletor CSS.
+- `.gitignore` adicionado para evitar novos arquivos de credenciais e configurações locais no Git. Ele não remove arquivos já rastreados e não protege um upload manual.
+- Avisos técnicos de HTTPS e cookies atualizados; referência ao reCAPTCHA adicionada aos textos pertinentes.
 
-Foram identificadas as seguintes integrações externas:
+## Pendências antes de considerar o lançamento concluído
 
-| Serviço | Momento de contato | Finalidade observada | Situação |
-| --- | --- | --- | --- |
-| Fontshare | Carregamento da página | Entrega de fonte | Recurso visual atual, requer revisão contratual e de privacidade |
-| jsDelivr | Carregamento da página | Entrega de Three.js e plugins GSAP | Recurso funcional atual, requer revisão de dependência e privacidade |
-| FormSubmit | Envio do formulário | Processamento e encaminhamento dos dados enviados | Terceiro que recebe dados pessoais após ação do usuário |
-| WhatsApp | Clique no link | Canal externo de contato | O visitante deixa o site e passa a seguir as políticas do fornecedor |
-| Instagram | Clique no link | Rede social externa | O visitante deixa o site e passa a seguir as políticas do fornecedor |
+1. **Formulário:** ativar o link enviado pelo FormSubmit a `bowstudiorioclaro@gmail.com` e confirmar um contato real na caixa de entrada, incluindo resposta ao endereço do cliente. O teste de POST em 09/11 retornou 200 com “Check Your Email” e pedido de ativação; isso não comprova entrega do contato. O CAPTCHA agora está ativo e deve ser concluído no teste pelo navegador.
+2. **Textos institucionais:** o site ainda contém indicações de razão social, CNPJ/endereço e prazo de retenção pendentes. Substituir pelos dados reais e validar os textos com quem responde pela empresa. Não foram inventados dados cadastrais.
+3. **Publicação:** subir juntos os HTMLs e scripts atualizados, além dos assets existentes. No upload manual, não incluir `.git`, `.env`, chaves, backups e documentos internos. Fazer conferência visual e testar contato/WhatsApp depois da publicação.
+4. **Acesso às contas:** verificar autenticação em dois fatores e recuperação do GitHub, do registrador do domínio e do Gmail. Não foi possível verificar essas configurações nesta revisão.
 
-As escolhas do painel de cookies usam `localStorage`, não cookie. Nenhum script opcional está ativo no código atual. Autorizar uma categoria opcional não inicia rastreamento enquanto não houver um script explicitamente associado a ela.
+## Reforços que dependem da hospedagem
 
-## Formulário e dados pessoais
+A resposta HTTPS consultada não apresentou `Strict-Transport-Security`, `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options` ou `Permissions-Policy`. Isso não equivale, isoladamente, a uma invasão ou falha crítica.
 
-Dados observados no formulário:
+Quando houver suporte na camada de hospedagem/proxy, considerar `X-Content-Type-Options: nosniff`, uma política de permissões desativando câmera/microfone/localização quando não usados, e `Content-Security-Policy: frame-ancestors 'none'` se o site não precisar ser incorporado. A diretiva `frame-ancestors` precisa de cabeçalho HTTP; colocá-la em meta não funciona. Testar uma CSP completa em modo Report-Only antes de bloquear scripts e fontes. Não incluir subdomínios em HSTS sem verificar que todos suportam HTTPS.
 
-- Nome.
-- Nome da empresa.
-- E-mail para contato.
-- Serviços de interesse.
-- Texto livre sobre o negócio.
+Não foram adicionados arquivos `_headers` ou `.htaccess` que não seriam aplicados automaticamente pela hospedagem GitHub Pages identificada.
 
-O formulário inclui campo honeypot e validação no navegador. O envio é feito diretamente ao FormSubmit e não existe backend próprio no projeto local. A proteção, retenção e exclusão no serviço terceiro precisam ser verificadas contratualmente. O texto livre pode receber dados além do necessário; recomenda-se orientação operacional para não solicitar dados sensíveis.
+## Validação
 
-## Segurança e HTTPS
+- Sintaxe dos três scripts locais verificada com `node --check`.
+- 14 testes locais passaram (formulário e preferências de cookies), incluindo o requisito de CAPTCHA ativo.
+- Integridade dos nove elementos de script externos (o Three.js aparece nas duas páginas) conferida contra os oito arquivos obtidos do CDN.
+- Não foi feita nova submissão de contato nesta revisão de segurança.
 
-Não foi possível verificar, sem domínio ou acesso à hospedagem:
+## Referências técnicas
 
-- Certificado SSL/TLS válido.
-- Redirecionamento HTTP para HTTPS.
-- Suporte efetivo a TLS 1.2 e TLS 1.3.
-- Renovação automática do certificado.
-- HSTS.
-- Content Security Policy entregue por cabeçalho.
-- `X-Content-Type-Options`, `Permissions-Policy` e demais cabeçalhos de produção.
-- Proteções e logs do servidor que receberá o site.
-
-Não foi adicionada uma CSP por `meta` porque a política correta depende da hospedagem, dos cabeçalhos reais e de testes com Fontshare, jsDelivr e FormSubmit. A recomendação é configurar CSP e cabeçalhos na infraestrutura, testar em modo de relatório e somente depois aplicar bloqueio.
-
-## Pendências jurídicas e operacionais
-
-Devem ser fornecidos e validados pela B0w Studio antes da publicação definitiva dos textos:
-
-- Razão social da responsável legal.
-- CNPJ.
-- Endereço cadastral.
-- Definição do controlador e, se aplicável, encarregado ou canal formal de privacidade.
-- Prazo interno de retenção dos contatos.
-- Procedimento para atender direitos dos titulares.
-- Base legal validada para cada tratamento real.
-- Contratos e termos aplicáveis com FormSubmit, provedor de e mail, Fontshare, jsDelivr e demais fornecedores.
-- Foro e legislação contratual aplicável aos serviços.
-- Confirmação dos direitos de uso das imagens, fontes e demais ativos.
-- Revisão jurídica final dos textos.
-
-## Testes realizados no código local
-
-- Verificação de sintaxe JavaScript.
-- Verificação estrutural de abertura dos quatro modais por seus respectivos gatilhos.
-- Verificação estática dos atributos ARIA dos diálogos.
-- Verificação da presença de fechamento por botão e Escape.
-- Verificação da lógica de focus trap e restauração de foco.
-- Verificação da lógica de bloqueio e restauração da rolagem.
-- Verificação do armazenamento, recusa e leitura das preferências.
-- Verificação de bloqueio por categoria para scripts opcionais.
-- Verificação de regras responsivas e suporte a movimento reduzido.
-
-## Testes ainda necessários em ambiente de navegador e produção
-
-- Teste manual completo com teclado, leitores de tela e toque.
-- Teste visual em diferentes larguras e sistemas operacionais.
-- Teste do envio real do formulário e do ciclo de exclusão no FormSubmit.
-- Inspeção de rede e armazenamento no navegador para confirmar o comportamento dos fornecedores externos.
-- Auditoria automatizada WCAG 2.2 AA e correções resultantes.
-- Verificação do domínio, certificado, TLS, redirecionamentos e cabeçalhos de segurança.
-- Teste de Content Security Policy antes de ativação em modo de bloqueio.
-
+- [HTTPS no GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/securing-your-github-pages-site-with-https)
+- [MDN — Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Subresource_Integrity)
+- [MDN — form-action](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/form-action)
+- [MDN — frame-ancestors](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/frame-ancestors)
+- [OSV — consulta por pacote e versão](https://google.github.io/osv.dev/post-v1-query/)
+- [FormSubmit — documentação](https://formsubmit.co/documentation)

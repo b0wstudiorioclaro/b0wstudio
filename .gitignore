@@ -1,0 +1,13 @@
+# Local credentials must never be committed or included in a manual upload.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+.codex/
+.agents/
+node_modules/
+*.log

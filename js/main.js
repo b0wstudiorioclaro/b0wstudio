@@ -36,7 +36,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   startHero();
   initReveals();
   window.ScrollTrigger?.refresh();
-  const initialTarget = window.location.hash ? document.querySelector(window.location.hash) : null;
+  let initialTarget = null;
+  try {
+    initialTarget = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+  } catch (error) { /* Ignore malformed URL fragments instead of stopping the page. */ }
   if (initialTarget) {
     initialTarget.scrollIntoView({ block: "start" });
   }
@@ -645,18 +648,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const submitButton = form.querySelector('[type="submit"]');
     const submitLabel = form.querySelector("[data-submit-label]");
     const status = form.querySelector(".contact-form-status");
-    const successMessage = "Projeto enviado com sucesso para a B0w Studio!";
+    let submitting = false;
+    let navigationTimer;
 
     const resetSubmitState = () => {
-      if (!submitButton?.classList.contains("is-success")) return;
-      submitButton.classList.remove("is-success");
+      submitting = false;
+      window.clearTimeout(navigationTimer);
       submitButton.disabled = false;
+      submitButton.classList.remove("is-loading");
+      submitButton.removeAttribute("aria-busy");
       submitButton.removeAttribute("aria-label");
-      if (submitLabel) submitLabel.textContent = "Enviar projeto";
-      if (status) {
-        status.textContent = "";
-        status.className = "contact-form-status";
-      }
+      submitLabel.textContent = "Enviar projeto";
+      status.textContent = "";
+      status.className = "contact-form-status";
     };
 
     const validateServices = (showError = false) => {
@@ -667,79 +671,58 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     serviceInputs.forEach((input) => input.addEventListener("change", () => validateServices(true)));
-    form.addEventListener("input", resetSubmitState);
+    // Restore controls when returning from the provider, including the back/forward cache.
+    window.addEventListener("pageshow", resetSubmitState);
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      if (submitButton.disabled) return;
+    // Enhance the native POST without intercepting it with fetch/AJAX.
+    // Without JavaScript, the form's action, method and named fields still work.
+    form.addEventListener("formdata", (event) => {
+      const data = event.formData;
+      const company = String(data.get("Empresa") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      const message = String(data.get("Sobre o negócio") || "").trim();
+      data.set("Nome", String(data.get("Nome") || "").trim());
+      data.set("Empresa", company);
+      data.set("email", email);
+      data.set("_replyto", email);
+      data.set("_subject", `B0w Studio | Novo projeto — ${company.replace(/[\r\n]+/g, " ").slice(0, 100)}`);
+      data.delete("Serviços[]");
+      data.delete("Sobre o negócio");
+      data.set("Serviços desejados", serviceInputs.filter((input) => input.checked).map((input) => input.value).join(", "));
+      data.set("Sobre o negócio", message);
+    });
+
+    form.addEventListener("submit", (event) => {
+      if (submitting) {
+        event.preventDefault();
+        return;
+      }
       if (!form.checkValidity()) {
+        event.preventDefault();
         form.reportValidity();
         return;
       }
       if (!validateServices(true)) {
+        event.preventDefault();
         serviceInputs[0]?.focus();
         return;
       }
 
-      const formData = new FormData(form);
-      const selectedServices = serviceInputs.filter((input) => input.checked).map((input) => input.value);
-      const company = formData.get("Empresa").trim();
-      const email = formData.get("email").trim();
-      const message = formData.get("Sobre o negócio").trim();
-      formData.set("Nome", formData.get("Nome").trim());
-      formData.set("Empresa", company);
-      formData.set("email", email);
-      formData.set("_replyto", email);
-      formData.set("_subject", `B0w Studio | Novo projeto — ${company.replace(/[\r\n]+/g, " ").slice(0, 100)}`);
-      // Keep the email easy to scan: contact, services, then the project brief.
-      formData.delete("Serviços[]");
-      formData.delete("Sobre o negócio");
-      formData.append("Serviços desejados", selectedServices.join(", "));
-      formData.append("Sobre o negócio", message);
+      submitting = true;
       submitButton.disabled = true;
-      submitButton.classList.remove("is-success");
       submitButton.classList.add("is-loading");
       submitButton.setAttribute("aria-busy", "true");
       submitButton.setAttribute("aria-label", "Enviando projeto");
       submitLabel.textContent = "Enviando projeto";
-      status.textContent = "";
       status.className = "contact-form-status";
-
-      const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 30000);
-      try {
-        const endpoint = form.action.replace("https://formsubmit.co/", "https://formsubmit.co/ajax/");
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { Accept: "application/json" },
-          body: formData,
-          signal: controller.signal
-        });
-        const result = await response.json();
-        if (!response.ok || (result?.success !== true && result?.success !== "true")) throw new Error("Falha no envio");
-
-        form.reset();
-        validateServices(false);
-        submitButton.classList.remove("is-loading");
-        submitButton.classList.add("is-success");
-        submitButton.removeAttribute("aria-busy");
-        submitButton.setAttribute("aria-label", successMessage);
-        submitLabel.textContent = successMessage;
-        status.textContent = successMessage;
-        status.classList.add("is-success", "is-visually-hidden");
-      } catch (error) {
-        submitButton.classList.remove("is-loading");
-        submitButton.disabled = false;
-        submitButton.removeAttribute("aria-busy");
-        submitButton.removeAttribute("aria-label");
-        submitLabel.textContent = "Tentar novamente";
-        status.textContent = error.name === "AbortError"
-          ? "O envio demorou mais que o esperado e não conseguimos confirmar o recebimento. Seus dados continuam aqui. Tente novamente ou fale pelo WhatsApp."
-          : "Não foi possível confirmar o envio. Seus dados continuam aqui. Tente novamente ou fale pelo WhatsApp.";
+      status.textContent = "Aguarde a confirmação na próxima página.";
+      // If navigation is cancelled or stalls, let the visitor try again.
+      navigationTimer = window.setTimeout(() => {
+        resetSubmitState();
+        status.textContent = "Se a página de confirmação não abriu, tente novamente ou fale pelo WhatsApp. Seus dados continuam aqui.";
         status.classList.add("is-error");
-      } finally {
-        window.clearTimeout(timeout);
-      }
+      }, 20000);
+      // Do not preventDefault here: the browser submits directly to FormSubmit.
     });
   }
 
