@@ -3,137 +3,125 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 const { test } = require("node:test");
-
 const html = fs.readFileSync(path.join(__dirname, "../index.html"), "utf8");
 const source = fs.readFileSync(path.join(__dirname, "../js/main.js"), "utf8");
 const code = source.slice(source.indexOf("  function initContactForm()"), source.indexOf("  function initLegalAndCookieModals()"));
 const formMarkup = html.match(/<form\b[^>]*data-contact-form>[\s\S]*?<\/form>/)[0];
-
 function element() {
-  const listeners = new Map();
-  const classes = new Set();
+  const listeners = new Map(), classes = new Set();
   return {
-    disabled: false, hidden: false, textContent: "", focused: false,
-    classList: {
-      add: (...names) => names.forEach(name => classes.add(name)),
-      remove: (...names) => names.forEach(name => classes.delete(name)),
-      contains: name => classes.has(name),
-      toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name)
-    },
-    set className(value) { classes.clear(); value.split(/\s+/).filter(Boolean).forEach(name => classes.add(name)); },
+    disabled: false, hidden: false, textContent: "", focused: false, value: "", selectionStart: 0,
+    setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; },
+    classList: { add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)), contains: n => classes.has(n), toggle: (n, enabled) => enabled ? classes.add(n) : classes.delete(n) },
+    set className(value) { classes.clear(); value.split(/\s+/).filter(Boolean).forEach(n => classes.add(n)); },
     setAttribute() {}, removeAttribute() {},
     addEventListener: (name, callback) => listeners.set(name, callback),
     fire: (name, event) => listeners.get(name)?.(event),
     focus() { this.focused = true; }
   };
 }
-
-function openForm() {
+function openForm(fetchResponse = async () => ({ ok: true, json: async () => ({ success: "true" }) })) {
   const form = element();
-  form.valid = true;
-  form.checkValidity = () => form.valid;
+  form.action = formMarkup.match(/action="([^"]+)"/)[1];
+  form.valid = true; form.resets = 0;
+  form.checkValidity = () => form.valid && /^\([1-9][0-9]\) 9[0-9]{4}-[0-9]{4}$/.test(phone.value);
   form.reportValidity = () => { form.reported = true; };
-  const services = [...formMarkup.matchAll(/type="checkbox" name="Serviços\[\]" value="([^"]+)"/g)]
-    .map((match, index) => Object.assign(element(), { value: match[1], checked: index < 2 }));
-  const button = element(), label = element(), status = element(), error = element();
-  const elements = new Map([
-    ['[type="submit"]', button], ["[data-submit-label]", label],
-    [".contact-form-status", status], [".contact-field-error", error], [".contact-services", element()]
-  ]);
-  form.querySelector = selector => elements.get(selector);
+  form.reset = () => { form.resets++; phone.value = ""; services.forEach(s => { s.checked = false; }); };
+  const services = [...formMarkup.matchAll(/type="checkbox" name="Serviços\[\]" value="([^"]+)"/g)].map((m, i) => Object.assign(element(), { value: m[1], checked: i < 2 }));
+  const button = element(), label = element(), status = element(), error = element(), success = element(), again = element(), name = element();
+  const phone = element(); phone.value = "19998157374"; phone.selectionStart = 11;
+  success.hidden = true;
+  const elements = new Map([['[type="submit"]', button], ["[data-submit-label]", label], [".contact-form-status", status], [".contact-field-error", error], [".contact-services", element()], ["[data-contact-success]", success], ["[data-contact-again]", again], ['input[name="Nome"]', name]]);
+  elements.set("[data-phone-input]", phone);
+  form.querySelector = s => elements.get(s);
   form.querySelectorAll = () => services;
-  const data = new FormData();
-  for (const match of formMarkup.matchAll(/type="hidden" name="([^"]+)" value="([^"]*)"/g)) data.set(match[1], match[2]);
-  data.set("_honey", "");
-  data.set("Nome", "  Cliente de teste  ");
-  data.set("Empresa", "  Marca teste  ");
-  data.set("email", "cliente@example.com");
-  data.set("Sobre o negócio", "  Primeira linha\nSegunda linha  ");
-  const timers = new Map(), windowListeners = new Map();
-  let timerId = 0;
+  const values = new Map([...formMarkup.matchAll(/type="hidden" name="([^"]+)" value="([^"]*)"/g)].map(m => [m[1], m[2]]));
+  values.set("_honey", ""); values.set("Nome", "  Cliente de teste  "); values.set("Empresa", "  Marca teste  "); values.set("email", "cliente@example.com"); values.set("Sobre o negócio", "  Primeira linha\nSegunda linha  ");
+  const requests = [], timers = new Map(); let timerId = 0;
   vm.runInNewContext(`${code}\ninitContactForm();`, {
     document: { querySelector: () => form },
-    window: {
-      setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
-      clearTimeout(id) { timers.delete(id); },
-      addEventListener(name, callback) { windowListeners.set(name, callback); }
-    },
-    fetch() { assert.fail("Contact must use a native POST, not fetch"); }
+    window: { setTimeout(callback) { timers.set(++timerId, callback); return timerId; }, clearTimeout(id) { timers.delete(id); } },
+    AbortController,
+    FormData: class extends FormData { constructor() { super(); for (const [k,v] of values) this.append(k,v); for (const s of services.filter(s => s.checked)) this.append("Serviços[]", s.value); } },
+    fetch: async (url, options) => { requests.push({ url, ...options }); return fetchResponse(url, options); }
   });
-  return {
-    form, services, button, label, status, error, data, timers,
-    back: () => windowListeners.get("pageshow")(),
-    submit() {
-      const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
-      form.fire("submit", event);
-      if (!event.defaultPrevented) {
-        for (const service of services.filter(service => service.checked)) data.append("Serviços[]", service.value);
-        form.fire("formdata", { formData: data });
-      }
-      return event;
-    }
+  return { form, services, button, label, status, error, success, again, name, phone, requests, timers,
+    async submit() { const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } }; await form.fire("submit", event); assert.equal(event.defaultPrevented, true, "Must never navigate away"); }
   };
 }
-
-test("valid submission preserves native POST and organizes the email payload", () => {
-  const page = openForm();
-  assert.equal(page.submit().defaultPrevented, false);
-  assert.match(formMarkup, /action="https:\/\/formsubmit.co\/bowstudiorioclaro@gmail.com" method="POST"/);
-  assert.equal(page.data.get("_template"), "box");
-  assert.equal(page.data.get("_captcha"), "true");
-  assert.equal(page.data.get("_url"), "https://bowstudio.com.br/");
-  assert.equal(page.data.get("_replyto"), "cliente@example.com");
-  assert.equal(page.data.get("_subject"), "B0w Studio | Novo projeto — Marca teste");
-  assert.equal(page.data.get("Serviços desejados"), "Landing Pages, Identidade Visual");
-  assert.equal(page.data.has("Serviços[]"), false);
-  assert.deepEqual([...page.data].filter(([key]) => !key.startsWith("_")).map(([key]) => key),
-    ["Nome", "Empresa", "email", "Serviços desejados", "Sobre o negócio"]);
-  assert.equal(page.data.get("Sobre o negócio"), "Primeira linha\nSegunda linha");
-  assert.equal(page.button.classList.contains("is-success"), false);
+test("AJAX stays on site, sends organized data to B0w and shows confirmed success", async () => {
+  const page = openForm(); await page.submit();
+  assert.equal(page.requests[0].url, "https://formsubmit.co/ajax/bowstudiorioclaro@gmail.com");
+  assert.equal(page.requests[0].headers["Content-Type"], "application/json");
+  const data = JSON.parse(page.requests[0].body);
+  assert.equal(data._template, "box"); assert.equal(data._captcha, "false"); assert.equal(data._honey, "");
+  assert.equal(data._replyto, "cliente@example.com"); assert.equal(data._subject, "B0w Studio | Novo projeto — Marca teste");
+  assert.equal(data["Serviços desejados"], "Landing Pages, Identidade Visual");
+  assert.equal(data["Sobre o negócio"], "Primeira linha\nSegunda linha");
+  assert.equal(data.Celular, "(19) 99815-7374");
+  assert.equal(Object.hasOwn(data, "Serviços[]"), false);
+  assert.equal(page.form.resets, 1); assert.equal(page.success.hidden, false); assert.equal(page.success.focused, true);
+  assert.equal(page.form.classList.contains("is-submitted"), true); assert.equal(page.timers.size, 0);
+  assert.match(formMarkup, /<h4>Formulário enviado com Sucesso<\/h4>/);
 });
-
-test("invalid fields and missing services block native submission", () => {
-  const page = openForm();
-  page.form.valid = false;
-  assert.equal(page.submit().defaultPrevented, true);
-  assert.equal(page.form.reported, true);
-  page.form.valid = true;
-  page.services.forEach(service => { service.checked = false; });
-  assert.equal(page.submit().defaultPrevented, true);
-  assert.equal(page.error.hidden, false);
-  assert.equal(page.services[0].focused, true);
-  assert.equal(page.button.disabled, false);
+test("invalid input and missing services do not send", async () => {
+  const page = openForm(); page.form.valid = false; await page.submit(); assert.equal(page.form.reported, true);
+  page.form.valid = true; page.services.forEach(s => { s.checked = false; }); await page.submit();
+  assert.equal(page.error.hidden, false); assert.equal(page.services[0].focused, true); assert.equal(page.requests.length, 0);
 });
-
-test("double submits are blocked and returning from the provider restores controls", () => {
-  const page = openForm();
-  assert.equal(page.submit().defaultPrevented, false);
-  assert.equal(page.submit().defaultPrevented, true);
-  assert.equal(page.button.disabled, true);
-  page.back();
-  assert.equal(page.button.disabled, false);
-  assert.equal(page.timers.size, 0);
-  assert.equal(page.status.textContent, "");
-  assert.equal(page.submit().defaultPrevented, false);
+test("HTTP failures, malformed responses and network errors preserve data and hide success", async () => {
+  const responses = [
+    async () => ({ ok: true, json: async () => ({ success: false }) }),
+    async () => ({ ok: true, json: async () => ({ success: "false" }) }),
+    async () => ({ ok: true, json: async () => ({}) }),
+    async () => ({ ok: true, json: async () => null }),
+    async () => ({ ok: false, json: async () => ({ success: true }) }),
+    async () => ({ ok: true, json: async () => { throw new SyntaxError(); } }),
+    async () => { throw new TypeError("Network error"); }
+  ];
+  for (const response of responses) {
+    const page = openForm(response); await page.submit();
+    assert.equal(page.form.resets, 0); assert.equal(page.success.hidden, true); assert.equal(page.button.disabled, false);
+    assert.equal(page.status.classList.contains("is-error"), true); assert.equal(page.timers.size, 0);
+  }
 });
-
-test("a stalled navigation unlocks the form without claiming delivery or clearing data", () => {
-  const page = openForm();
-  page.submit();
-  for (const timer of page.timers.values()) timer();
-  assert.equal(page.button.disabled, false);
-  assert.equal(page.button.classList.contains("is-success"), false);
-  assert.equal(page.data.get("email"), "cliente@example.com");
-  assert.match(page.status.textContent, /não abriu/);
+test("duplicate submits are blocked and timeout releases controls", async () => {
+  const page = openForm((url, {signal}) => new Promise((resolve, reject) => signal.addEventListener("abort", () => reject(Object.assign(new Error(), {name: "AbortError"})))));
+  const pending = page.submit(); await page.submit(); assert.equal(page.requests.length, 1); assert.equal(page.button.disabled, true);
+  for (const timer of page.timers.values()) timer(); await pending;
+  assert.equal(page.form.resets, 0); assert.equal(page.button.disabled, false); assert.match(page.status.textContent, /demorou/);
 });
-
-test("HTML works without JS and WhatsApp targets the requested number", () => {
+test("success can be dismissed for a new project and does not resend automatically", async () => {
+  const page = openForm(async () => ({ ok: true, json: async () => ({ success: true }) })); await page.submit(); await page.submit();
+  assert.equal(page.requests.length, 1); page.again.fire("click");
+  assert.equal(page.success.hidden, true); assert.equal(page.form.classList.contains("is-submitted"), false); assert.equal(page.name.focused, true);
+  page.services[0].checked = true; page.phone.value = "11912345678"; await page.submit(); assert.equal(page.requests.length, 2);
+});
+test("phone mask supports typing, pasting with country code and clearing", () => {
+  const { phone } = openForm();
+  for (const [input, expected] of [
+    ["1", "(1"], ["19", "(19"], ["199", "(19) 9"], ["1999815", "(19) 99815"],
+    ["19998157374", "(19) 99815-7374"], ["+55 (19) 99815-7374", "(19) 99815-7374"],
+    ["(55) 99999-1234", "(55) 99999-1234"], ["abc19998157374", "(19) 99815-7374"],
+    ["199981573749999", "(19) 99815-7374"], ["", ""]
+  ]) {
+    phone.value = input; phone.selectionStart = input.length; phone.fire("input");
+    assert.equal(phone.value, expected); assert.equal(phone.selectionStart, expected.length);
+  }
+});
+test("editing phone digits preserves the caret and incomplete numbers cannot submit", async () => {
+  const page = openForm();
+  page.phone.value = "(19) 99815-7374"; page.phone.selectionStart = 8; page.phone.fire("input");
+  assert.equal(page.phone.selectionStart, 8);
+  for (const value of ["", "19998", "1933334444", "00998157374"]) {
+    page.phone.value = value; await page.submit(); assert.equal(page.form.reported, true);
+  }
+  assert.equal(page.requests.length, 0);
+  assert.match(formMarkup, /type="tel" name="Celular"[^>]*required/);
+});
+test("WhatsApp remains correct and the confirmation respects reduced motion", () => {
+  const link = new URL(html.match(/class="contact-whatsapp" href="([^"]+)"/)[1]); assert.equal(link.pathname, "/5519998157374");
   assert.doesNotMatch(formMarkup, /web3forms|access_key|your@email.com|_cc/);
-  assert.match(formMarkup, /type="email" name="email"[^>]*required/);
-  assert.match(formMarkup, /name="_honey"/);
-  assert.match(formMarkup, /type="submit"/);
-  const link = new URL(html.match(/class="contact-whatsapp" href="([^"]+)"/)[1]);
-  assert.equal(link.origin, "https://wa.me");
-  assert.equal(link.pathname, "/5519998157374");
-  assert.equal(link.searchParams.get("text"), "Olá, B0w Studio! Tenho um projeto em mente.");
+  const css = fs.readFileSync(path.join(__dirname, "../css/style.css"), "utf8");
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\.contact-success/);
 });

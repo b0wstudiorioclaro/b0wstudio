@@ -3,16 +3,17 @@
 ## Contato
 
 - Destinatário único do formulário: `bowstudiorioclaro@gmail.com`.
-- Envio nativo por `POST` para `https://formsubmit.co/bowstudiorioclaro@gmail.com`. Funciona também sem JavaScript; com JavaScript, valida os serviços e organiza os campos no e-mail. Não utiliza `fetch`, AJAX ou Web3Forms.
+- Envio em segundo plano por `POST` JSON para `https://formsubmit.co/ajax/bowstudiorioclaro@gmail.com`, sem sair de `bowstudio.com.br`. O navegador precisa abrir a página por HTTP/HTTPS; o FormSubmit valida a origem da requisição.
 - Modelo de e-mail `box`, assunto identificando a empresa e resposta para o endereço informado pelo visitante.
-- CAPTCHA do FormSubmit ativado, além do honeypot. O visitante pode precisar concluir a verificação antispam na página do provedor.
+- Campo de celular obrigatório ao lado do e-mail, com máscara `(99) 99999-9999`, validação de DDD + 9 dígitos e suporte a colagem com `+55`. O número formatado acompanha os demais dados no e-mail.
+- Honeypot preservado. No envio AJAX, `_captcha=false` evita a tela externa de CAPTCHA. Sem JavaScript, o HTML mantém o envio nativo com CAPTCHA, que pode sair do site. Para manter CAPTCHA no fluxo AJAX, seria necessária outra integração antispam compatível com essa modalidade.
 - WhatsApp: [(19) 99815-7374](https://wa.me/5519998157374).
 
-Em 09/11/2026, o FormSubmit voltou a responder HTTP 200. Um POST real de teste para o destinatário retornou **Check Your Email**, informando que enviou um link **Activate Form**. É necessário abrir esse e-mail em `bowstudiorioclaro@gmail.com` (conferir também o spam) e ativar o formulário. Essa resposta confirma a solicitação de ativação, não a entrega do projeto na caixa de entrada.
+Em 09/11/2026, o teste real do endpoint AJAX, com os cabeçalhos Origin e Referer de `https://bowstudio.com.br/`, retornou HTTP 200 e `success: "true"` com a mensagem `The form was submitted successfully.` O teste confirma a aceitação pelo serviço; conferir a entrega em `bowstudiorioclaro@gmail.com`, inclusive no spam.
 
-Para publicar a correção, enviar `index.html` e `js/main.js` juntos à hospedagem atual (GitHub Pages). O script tem uma versão na URL para evitar cache da implementação antiga. Após a publicação e a ativação, enviar um projeto pelo navegador em `https://bowstudio.com.br/` e conferir o recebimento e o endereço de resposta na caixa da B0w.
+Para publicar a correção, enviar `index.html`, `js/main.js` e `css/style.css` juntos à hospedagem atual (GitHub Pages). O script e o CSS têm uma versão na URL para evitar cache da implementação antiga. Após a publicação, enviar um projeto pelo navegador e conferir o recebimento e o endereço de resposta na caixa da B0w.
 
-A confirmação ou eventual erro do provedor aparece na página do próprio FormSubmit. O site não mostra sucesso antes dessa confirmação e preserva os dados ao voltar pelo navegador.
+Após confirmação explícita da API, o formulário mostra **Formulário enviado com Sucesso**, check animado, círculo e partículas sutis. A animação respeita a preferência por movimento reduzido. O botão **Enviar outro projeto** restaura o formulário. Em erros, os dados são mantidos, não há redirecionamento nem mensagem falsa de sucesso. O prazo para aguardar resposta é de 30 segundos.
 
 Documentação: [configuração](https://formsubmit.co/documentation), [modelos](https://formsubmit.co/email-templates) e [ativação](https://formsubmit.co/help).
 

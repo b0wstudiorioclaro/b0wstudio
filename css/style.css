@@ -407,6 +407,30 @@ html.legal-scroll-locked,body.legal-modal-open{overflow:hidden;overscroll-behavi
 /* Keep the contact title inside its card at every width */
 .contact-panel h3.contact-panel-title{min-width:0;max-width:100%;line-height:1.05;white-space:normal;overflow-wrap:normal;text-wrap:balance}
 
+/* Inline contact confirmation */
+.contact-success[hidden]{display:none!important}
+.contact-form.is-submitted{min-height:30rem;align-content:center}
+.contact-form.is-submitted>:not(.contact-success){display:none!important}
+.contact-success{padding:1.5rem .25rem;text-align:center;outline:none;animation:contact-success-enter .65s var(--ease) both}
+.contact-success-art{position:relative;display:grid;width:8rem;height:8rem;place-items:center;margin:0 auto 1.5rem}
+.contact-success-disc{display:grid;width:5.5rem;height:5.5rem;place-items:center;border-radius:50%;background:#101413;box-shadow:0 .7rem 2rem rgba(16,20,19,.12);animation:contact-success-pop .7s cubic-bezier(.2,1.4,.4,1) both}
+.contact-success-disc svg{width:3rem;height:3rem;fill:none;stroke:#c6efcc;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.contact-success-disc path{stroke-dasharray:48;stroke-dashoffset:48;animation:contact-success-check .5s .3s ease forwards}
+.contact-success-ring{position:absolute;inset:0;border:1px solid #b6d2be;border-radius:50%;animation:contact-success-ring .95s .1s ease-out both}
+.contact-success-art i{--spark-x:0rem;--spark-y:-4rem;position:absolute;width:.35rem;height:.35rem;border-radius:50%;background:#779b80;animation:contact-success-spark .85s .2s ease-out both}
+.contact-success-art i:nth-of-type(2){--spark-x:3.5rem;--spark-y:-2rem}.contact-success-art i:nth-of-type(3){--spark-x:3.5rem;--spark-y:2rem}.contact-success-art i:nth-of-type(4){--spark-y:4rem}.contact-success-art i:nth-of-type(5){--spark-x:-3.5rem;--spark-y:2rem}.contact-success-art i:nth-of-type(6){--spark-x:-3.5rem;--spark-y:-2rem}
+.contact-success-eyebrow{color:#697b6d;font-size:.6rem;font-weight:700;letter-spacing:.14em}
+.contact-success h4{max-width:16ch;margin:.85rem auto 0;color:#111;font-family:"Clash Display",sans-serif;font-size:clamp(1.8rem,3vw,2.7rem);font-weight:500;letter-spacing:-.04em;line-height:1.08;text-wrap:balance}
+.contact-success-copy{max-width:35ch;margin:1rem auto 0;color:#6b706d;font-size:.85rem;line-height:1.6}
+.contact-success-again{display:inline-flex;align-items:center;justify-content:center;gap:1.4rem;min-height:2.75rem;margin-top:1.8rem;padding:.7rem 1.15rem;border:1px solid #c8d0ca;border-radius:99px;color:#273b2c;font-size:.75rem;cursor:pointer;transition:background-color .2s}
+.contact-success-again:hover{background:#e5ece6}.contact-success-again:focus-visible{outline:2px solid #273b2c;outline-offset:4px}
+@keyframes contact-success-enter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes contact-success-pop{from{opacity:0;transform:scale(.55)}to{opacity:1;transform:scale(1)}}
+@keyframes contact-success-check{to{stroke-dashoffset:0}}
+@keyframes contact-success-ring{from{opacity:0;transform:scale(.65)}45%{opacity:.8}to{opacity:.35;transform:scale(1)}}
+@keyframes contact-success-spark{from{opacity:0;transform:translate(0,0) scale(0)}45%{opacity:1}to{opacity:0;transform:translate(var(--spark-x),var(--spark-y)) scale(.65)}}
+@media(prefers-reduced-motion:reduce){.contact-success,.contact-success-disc,.contact-success-ring,.contact-success-disc path,.contact-success-art i{animation:none}.contact-success-disc path{stroke-dashoffset:0}.contact-success-art i{display:none}.contact-success-again{transition:none}}
+
 /* Every visible B0w mark returns to the beginning */
 .brand,.mobile-brand,.mobile-symbol-home,.footer-brand-link{position:relative;z-index:2;display:block;cursor:pointer;pointer-events:auto}
 .brand::before,.mobile-brand::before,.mobile-symbol-home::before,.footer-brand-link::before{position:absolute;inset:-.65rem;content:""}

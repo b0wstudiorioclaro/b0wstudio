@@ -22,7 +22,7 @@ As alterações locais precisam ser publicadas. Os cabeçalhos consultados são 
 | Avisos conhecidos | Consulta OSV para `npm:three@0.128.0` e `npm:gsap@3.15.1` retornou resultados vazios. Ausência de avisos na base não garante ausência de falhas. |
 | CDN | Os oito scripts retornaram arquivos com sucesso e cabeçalho CORS permitindo a verificação SRI. |
 | Links externos | WhatsApp e Instagram usam HTTPS e `noopener noreferrer` ao abrir uma nova aba. |
-| Dados do contato | Nome, empresa, e-mail, serviços e descrição; POST direto para FormSubmit. O código próprio não grava esses dados em cookies ou localStorage. |
+| Dados do contato | Nome, empresa, e-mail, celular com DDD, serviços e descrição; POST AJAX para FormSubmit. O código próprio não grava esses dados em cookies ou localStorage. |
 | Preferências | Cookie necessário com `SameSite=Lax`, `Secure` em HTTPS e validade de 180 dias, além de localStorage. Não contém dados do formulário. |
 | Rastreamento | Nenhum Google Analytics, Meta Pixel ou outro script opcional ativo identificado no código próprio. Terceiros podem receber dados técnicos nas requisições. |
 
@@ -32,14 +32,14 @@ As alterações locais precisam ser publicadas. Os cabeçalhos consultados são 
 - GSAP fixado em 3.15.1, versão resolvida pelo endereço 3.15 durante a revisão. Three.js mantido em 0.128.0 para preservar compatibilidade.
 - CSP por meta com `base-uri 'none'`, `object-src 'none'` e `upgrade-insecure-requests`. Na home, `form-action` permite apenas a própria origem e `https://formsubmit.co`; na 404, nenhum formulário.
 - Esta CSP é parcial: não restringe todas as fontes de scripts e não substitui uma política completa contra XSS. A restrição de base impede a alteração do destino relativo por uma tag base injetada.
-- CAPTCHA do FormSubmit ativado (`_captcha=true`) e honeypot preservado. A confirmação antispam acontece na página do provedor.
+- O envio foi alterado para AJAX a pedido do responsável pelo site, mantendo a confirmação na própria página. Honeypot preservado; `_captcha=false` apenas na requisição AJAX, pois a tela externa de CAPTCHA não faz parte desse fluxo. Isso reduz a proteção antispam em relação ao POST com CAPTCHA. O fallback HTML sem JavaScript mantém `_captcha=true` e a navegação para o provedor.
 - Fragmentos de URL são tratados como IDs, com proteção contra codificação inválida, em vez de passados diretamente a um seletor CSS.
 - `.gitignore` adicionado para evitar novos arquivos de credenciais e configurações locais no Git. Ele não remove arquivos já rastreados e não protege um upload manual.
 - Avisos técnicos de HTTPS e cookies atualizados; referência ao reCAPTCHA adicionada aos textos pertinentes.
 
 ## Pendências antes de considerar o lançamento concluído
 
-1. **Formulário:** ativar o link enviado pelo FormSubmit a `bowstudiorioclaro@gmail.com` e confirmar um contato real na caixa de entrada, incluindo resposta ao endereço do cliente. O teste de POST em 09/11 retornou 200 com “Check Your Email” e pedido de ativação; isso não comprova entrega do contato. O CAPTCHA agora está ativo e deve ser concluído no teste pelo navegador.
+1. **Formulário:** confirmar um contato real em `bowstudiorioclaro@gmail.com`, incluindo resposta ao endereço do cliente. O teste AJAX em 09/11, com a origem do domínio, retornou HTTP 200 e `success: "true"`. Essa resposta confirma a aceitação pelo serviço, mas não comprova a entrega na caixa de entrada. Monitorar spam e abuso; para manter a confirmação no site com CAPTCHA, avaliar uma integração compatível com AJAX.
 2. **Textos institucionais:** o site ainda contém indicações de razão social, CNPJ/endereço e prazo de retenção pendentes. Substituir pelos dados reais e validar os textos com quem responde pela empresa. Não foram inventados dados cadastrais.
 3. **Publicação:** subir juntos os HTMLs e scripts atualizados, além dos assets existentes. No upload manual, não incluir `.git`, `.env`, chaves, backups e documentos internos. Fazer conferência visual e testar contato/WhatsApp depois da publicação.
 4. **Acesso às contas:** verificar autenticação em dois fatores e recuperação do GitHub, do registrador do domínio e do Gmail. Não foi possível verificar essas configurações nesta revisão.
@@ -55,9 +55,9 @@ Não foram adicionados arquivos `_headers` ou `.htaccess` que não seriam aplica
 ## Validação
 
 - Sintaxe dos três scripts locais verificada com `node --check`.
-- 14 testes locais passaram (formulário e preferências de cookies), incluindo o requisito de CAPTCHA ativo.
+- 17 testes locais passaram (formulário e preferências de cookies), incluindo erros HTTP/JSON/rede, timeout, bloqueio de envio duplicado, sucesso confirmado, novo projeto, máscara e validação do celular e ausência de navegação no fluxo JavaScript.
 - Integridade dos nove elementos de script externos (o Three.js aparece nas duas páginas) conferida contra os oito arquivos obtidos do CDN.
-- Não foi feita nova submissão de contato nesta revisão de segurança.
+- Na alteração posterior para confirmação dentro do site, foi feito um teste técnico real via AJAX. Resultado: HTTP 200, `success: "true"`.
 
 ## Referências técnicas
 

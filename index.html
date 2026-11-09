@@ -16,7 +16,7 @@
   <link rel="icon" type="image/svg+xml" href="ASSETS/SIMBOLO%20BOW%20BRANCA.svg">
   <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
   <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261109-contact-success">
   <script>document.documentElement.classList.replace('no-js', 'js');document.documentElement.classList.add('is-loading');</script>
 </head>
 <body>
@@ -289,10 +289,16 @@
                 </label>
               </div>
 
-              <label class="contact-field">
-                <span>E-mail para contato</span>
-                <input type="email" name="email" placeholder="Onde podemos te responder?" autocomplete="email" maxlength="254" required>
-              </label>
+              <div class="contact-fields">
+                <label class="contact-field">
+                  <span>E-mail para contato</span>
+                  <input type="email" name="email" placeholder="Onde podemos te responder?" autocomplete="email" maxlength="254" required>
+                </label>
+                <label class="contact-field">
+                  <span>Celular</span>
+                  <input type="tel" name="Celular" placeholder="(99) 99999-9999" autocomplete="tel-national" inputmode="tel" maxlength="20" pattern="\([1-9][0-9]\) 9[0-9]{4}-[0-9]{4}" title="Informe o DDD e o celular com 9 dígitos. Exemplo: (99) 99999-9999." data-phone-input required>
+                </label>
+              </div>
 
               <fieldset class="contact-services" aria-describedby="services-error">
                 <legend>Selecione aqui o serviço desejado <span>Marque quantos quiser</span></legend>
@@ -314,6 +320,17 @@
               <p class="contact-privacy-note">Ao enviar, seus dados serão usados para responder ao seu contato conforme a <button type="button" data-legal-open="privacy">Política de Privacidade</button>.</p>
               <button class="contact-primary" type="submit"><span data-submit-label>Enviar projeto</span><span class="contact-submit-icon" aria-hidden="true"><svg viewBox="0 0 20 20"><path class="contact-submit-arrow" d="M4.5 10h10m-4-4 4 4-4 4"/><path class="contact-submit-check" d="m4.8 10.2 3.1 3.1 7.2-7.1"/></svg></span></button>
               <p class="contact-form-status" role="status" aria-live="polite"></p>
+              <div class="contact-success" data-contact-success role="status" aria-live="polite" tabindex="-1" hidden>
+                <div class="contact-success-art" aria-hidden="true">
+                  <span class="contact-success-ring"></span>
+                  <span class="contact-success-disc"><svg viewBox="0 0 64 64"><path d="m18 33 9 9 19-20"/></svg></span>
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <p class="contact-success-eyebrow">PRÓXIMO PASSO: CRIAR JUNTOS</p>
+                <h4>Formulário enviado com Sucesso</h4>
+                <p class="contact-success-copy">Obrigado pelo contato! Vamos conhecer seu projeto e responder pelo e-mail informado.</p>
+                <button class="contact-success-again" type="button" data-contact-again>Enviar outro projeto <span aria-hidden="true">↗</span></button>
+              </div>
             </form>
             <a class="contact-whatsapp" href="https://wa.me/5519998157374?text=Ol%C3%A1%2C%20B0w%20Studio!%20Tenho%20um%20projeto%20em%20mente." target="_blank" rel="noopener noreferrer" aria-label="Chamar no WhatsApp: (19) 99815-7374">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.075-.792.372-.273.297-1.04 1.016-1.04 2.479s1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.693.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414-.074-.123-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.981.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.895 6.994c-.003 5.45-4.437 9.885-9.887 9.885m8.413-18.297A11.815 11.815 0 0 0 12.055 0C5.495 0 .16 5.335.157 11.893c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.558 0 11.894-5.336 11.897-11.893a11.821 11.821 0 0 0-3.483-8.413Z"/></svg>
@@ -378,7 +395,7 @@
         <p>Assuntos de privacidade podem ser enviados para <a href="mailto:bowstudiorioclaro@gmail.com">bowstudiorioclaro@gmail.com</a>.</p>
 
         <h3>2. Dados tratados</h3>
-        <p>O formulário coleta nome, nome da empresa, e-mail para contato, serviços de interesse e a mensagem enviada. Ao acessar o site, fornecedores técnicos podem receber dados de conexão necessários à entrega do conteúdo, como endereço IP, tipo de navegador, data, horário e registros técnicos de segurança. A B0w Studio não solicita dados sensíveis neste formulário.</p>
+        <p>O formulário coleta nome, nome da empresa, e-mail para contato, celular, serviços de interesse e a mensagem enviada. Ao acessar o site, fornecedores técnicos podem receber dados de conexão necessários à entrega do conteúdo, como endereço IP, tipo de navegador, data, horário e registros técnicos de segurança. A B0w Studio não solicita dados sensíveis neste formulário.</p>
 
         <h3>3. Finalidades e bases legais</h3>
         <p>Os dados do formulário são usados para responder ao contato, compreender a demanda e realizar procedimentos preliminares relacionados a uma possível contratação. O funcionamento seguro do site e a prevenção de abuso podem se apoiar no legítimo interesse, respeitados os direitos do titular. Qualquer rastreamento opcional que venha a ser adicionado dependerá de consentimento quando exigido.</p>
@@ -509,6 +526,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/TextPlugin.min.js" integrity="sha384-FKUisixYsrclTMwkaTwPEUYTmwB2+tvaj3c+q37hSPw3n0M64fuVcnO3t3s0Xcu5" crossorigin="anonymous"></script>
   <script src="js/symbol.js"></script>
   <script src="js/hero3d.js"></script>
-  <script src="js/main.js?v=20261109-security"></script>
+  <script src="js/main.js?v=20261109-contact-phone"></script>
 </body>
 </html>

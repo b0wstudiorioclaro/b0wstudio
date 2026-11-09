@@ -648,20 +648,41 @@ document.addEventListener("DOMContentLoaded", async () => {
     const submitButton = form.querySelector('[type="submit"]');
     const submitLabel = form.querySelector("[data-submit-label]");
     const status = form.querySelector(".contact-form-status");
+    const success = form.querySelector("[data-contact-success]");
+    const again = form.querySelector("[data-contact-again]");
+    const phone = form.querySelector("[data-phone-input]");
     let submitting = false;
-    let navigationTimer;
 
-    const resetSubmitState = () => {
-      submitting = false;
-      window.clearTimeout(navigationTimer);
-      submitButton.disabled = false;
-      submitButton.classList.remove("is-loading");
-      submitButton.removeAttribute("aria-busy");
-      submitButton.removeAttribute("aria-label");
-      submitLabel.textContent = "Enviar projeto";
-      status.textContent = "";
-      status.className = "contact-form-status";
+    const maskPhone = () => {
+      const raw = phone.value;
+      const caret = phone.selectionStart ?? raw.length;
+      let digitsBeforeCaret = raw.slice(0, caret).replace(/\D/g, "").length;
+      let digits = raw.replace(/\D/g, "");
+      // Accept pasted Brazilian numbers with the +55 country code as well.
+      if (digits.length === 13 && digits.startsWith("55")) {
+        digits = digits.slice(2);
+        digitsBeforeCaret = Math.max(0, digitsBeforeCaret - 2);
+      }
+      digits = digits.slice(0, 11);
+      let formatted = digits ? `(${digits.slice(0, 2)}` : "";
+      if (digits.length > 2) formatted += `) ${digits.slice(2, 7)}`;
+      if (digits.length > 7) formatted += `-${digits.slice(7)}`;
+      phone.value = formatted;
+      // Keep edits in the middle of the number at the same digit position.
+      let nextCaret = formatted.length;
+      if (caret < raw.length) {
+        nextCaret = 0;
+        let count = 0;
+        while (nextCaret < formatted.length && count < digitsBeforeCaret) {
+          if (/\d/.test(formatted[nextCaret])) count++;
+          nextCaret++;
+        }
+      }
+      phone.setSelectionRange(nextCaret, nextCaret);
     };
+    phone.addEventListener("input", maskPhone);
+    phone.addEventListener("change", maskPhone);
+    maskPhone();
 
     const validateServices = (showError = false) => {
       const isValid = serviceInputs.some((input) => input.checked);
@@ -671,58 +692,88 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     serviceInputs.forEach((input) => input.addEventListener("change", () => validateServices(true)));
-    // Restore controls when returning from the provider, including the back/forward cache.
-    window.addEventListener("pageshow", resetSubmitState);
+    again.addEventListener("click", () => {
+      success.hidden = true;
+      form.classList.remove("is-submitted");
+      status.textContent = "";
+      status.className = "contact-form-status";
+      submitLabel.textContent = "Enviar projeto";
+      form.querySelector('input[name="Nome"]').focus({ preventScroll: true });
+    });
 
-    // Enhance the native POST without intercepting it with fetch/AJAX.
-    // Without JavaScript, the form's action, method and named fields still work.
-    form.addEventListener("formdata", (event) => {
-      const data = event.formData;
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (submitting || form.classList.contains("is-submitted")) return;
+      maskPhone();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      if (!validateServices(true)) {
+        serviceInputs[0]?.focus();
+        return;
+      }
+
+      const data = new FormData(form);
       const company = String(data.get("Empresa") || "").trim();
       const email = String(data.get("email") || "").trim();
       const message = String(data.get("Sobre o negócio") || "").trim();
       data.set("Nome", String(data.get("Nome") || "").trim());
       data.set("Empresa", company);
       data.set("email", email);
+      data.set("Celular", phone.value);
       data.set("_replyto", email);
       data.set("_subject", `B0w Studio | Novo projeto — ${company.replace(/[\r\n]+/g, " ").slice(0, 100)}`);
+      // AJAX stays on this site; the provider's separate CAPTCHA page cannot be used here.
+      // Keep the honeypot in the request. The native no-JS fallback retains CAPTCHA.
+      data.set("_captcha", "false");
       data.delete("Serviços[]");
       data.delete("Sobre o negócio");
       data.set("Serviços desejados", serviceInputs.filter((input) => input.checked).map((input) => input.value).join(", "));
       data.set("Sobre o negócio", message);
-    });
-
-    form.addEventListener("submit", (event) => {
-      if (submitting) {
-        event.preventDefault();
-        return;
-      }
-      if (!form.checkValidity()) {
-        event.preventDefault();
-        form.reportValidity();
-        return;
-      }
-      if (!validateServices(true)) {
-        event.preventDefault();
-        serviceInputs[0]?.focus();
-        return;
-      }
 
       submitting = true;
       submitButton.disabled = true;
       submitButton.classList.add("is-loading");
       submitButton.setAttribute("aria-busy", "true");
-      submitButton.setAttribute("aria-label", "Enviando projeto");
       submitLabel.textContent = "Enviando projeto";
       status.className = "contact-form-status";
-      status.textContent = "Aguarde a confirmação na próxima página.";
-      // If navigation is cancelled or stalls, let the visitor try again.
-      navigationTimer = window.setTimeout(() => {
-        resetSubmitState();
-        status.textContent = "Se a página de confirmação não abriu, tente novamente ou fale pelo WhatsApp. Seus dados continuam aqui.";
+      status.textContent = "Enviando seu projeto…";
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const endpoint = form.action.replace("https://formsubmit.co/", "https://formsubmit.co/ajax/");
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(Object.fromEntries(data)),
+          signal: controller.signal
+        });
+        const result = await response.json().catch(() => null);
+        if (!response.ok || (result?.success !== true && result?.success !== "true")) {
+          throw new Error("Envio não confirmado");
+        }
+        // Only clear the visitor's data and animate after the API acknowledges the submission.
+        form.reset();
+        validateServices(false);
+        status.textContent = "";
+        form.classList.add("is-submitted");
+        success.hidden = false;
+        success.focus({ preventScroll: true });
+      } catch (error) {
+        submitLabel.textContent = "Tentar novamente";
         status.classList.add("is-error");
-      }, 20000);
-      // Do not preventDefault here: the browser submits directly to FormSubmit.
+        status.textContent = error.name === "AbortError"
+          ? "O envio demorou mais que o esperado. Não conseguimos confirmar o recebimento. Seus dados continuam aqui; tente novamente ou fale pelo WhatsApp."
+          : "Não foi possível confirmar o envio. Seus dados continuam aqui; tente novamente ou fale pelo WhatsApp.";
+      } finally {
+        window.clearTimeout(timeout);
+        submitting = false;
+        submitButton.disabled = false;
+        submitButton.classList.remove("is-loading");
+        submitButton.removeAttribute("aria-busy");
+      }
     });
   }
 
