@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /index.html
+Allow: /ASSETS/
+Allow: /*.webp
+Allow: /*.png
