@@ -12,7 +12,7 @@ test('HTML dependencies, accessible references, pinned vendors and CSP bootstrap
     for (const [, attr] of html.matchAll(/aria-(?:labelledby|describedby|controls)="([^"]+)"/g)) for (const id of attr.split(/\s+/)) assert.ok(ids.includes(id), `${name}: missing ${id}`);
     for (const [, ref] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
       if (/^(?:https?:|mailto:|data:|#)/.test(ref)) continue;
-      assert.ok(fs.existsSync(path.resolve(root, decodeURIComponent(ref.split(/[?#]/)[0]))), `${name}: missing ${ref}`);
+      assert.ok(fs.existsSync(path.resolve(root, decodeURIComponent(ref.split(/[?#]/)[0]).replace(/^\/+/, ''))), `${name}: missing ${ref}`);
     }
     for (const [, code] of html.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
       const hash = createHash('sha256').update(code.replace(/\r\n/g, '\n')).digest('base64');
@@ -28,7 +28,7 @@ test('HTML dependencies, accessible references, pinned vendors and CSP bootstrap
 });
 test('static build excludes private/development files and versions executable resources', { skip: !fs.existsSync(path.join(root, 'dist/index.html')) }, () => {
   const entries = fs.readdirSync(path.join(root, 'dist'));
-  assert.deepEqual(entries.sort(), ['.nojekyll', '404.html', 'ASSETS', 'CNAME', 'css', 'index.html', 'js'].sort());
+  assert.deepEqual(entries.sort(), ['.nojekyll', '404.html', 'ASSETS', 'CNAME', 'css', 'favicon.ico', 'index.html', 'js'].sort());
   const html = fs.readFileSync(path.join(root, 'dist/index.html'), 'utf8');
   for (const [, ref] of html.matchAll(/(?:src|href)="((?:js|css)\/[^" ]+)"/g)) assert.match(ref, /\?v=[a-f0-9]{12}$/);
 });

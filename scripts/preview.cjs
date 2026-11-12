@@ -5,7 +5,7 @@ const path = require('node:path');
 const zlib = require('node:zlib');
 const { createHash } = require('node:crypto');
 const root = path.resolve(__dirname, '..');
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.otf': 'font/otf' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.woff2': 'font/woff2', '.otf': 'font/otf' };
 const cache = new Map();
 http.createServer((req, res) => {
   let name;
@@ -15,7 +15,7 @@ http.createServer((req, res) => {
   if (baseline) name = name.slice('/__baseline'.length);
   if (release) name = name.slice('/__release'.length);
   if (name === '/') name = '/index.html';
-  if (!/^\/(?:index\.html|404\.html|(?:css|js|ASSETS)\/[^\0]+)$/.test(name) || name.includes('..') || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404).end(); return; }
+  if (!/^\/(?:index\.html|404\.html|favicon\.ico|(?:css|js|ASSETS)\/[^\0]+)$/.test(name) || name.includes('..') || !['GET', 'HEAD'].includes(req.method)) { res.writeHead(404).end(); return; }
   const base = release ? path.join(root, 'dist') : baseline && !name.startsWith('/ASSETS/') ? path.join(root, '.audit/before') : root;
   const file = path.join(base, name);
   fs.stat(file, (err, stat) => {

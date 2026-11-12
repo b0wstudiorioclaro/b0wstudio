@@ -15,7 +15,7 @@ function walk(dir) {
   }
 }
 for (const dir of ['css', 'js', 'ASSETS']) walk(dir);
-files.push('index.html', '404.html', 'CNAME');
+files.push('index.html', '404.html', 'favicon.ico', 'CNAME');
 // No recursive delete: refuse stale/unexpected files instead of removing user data.
 fs.mkdirSync(output, { recursive: true });
 const allowed = new Set([...files, '.nojekyll']);
