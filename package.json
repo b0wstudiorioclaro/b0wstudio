@@ -1,0 +1,16 @@
+{
+  "name": "b0w-studio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/preview.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "build": "node scripts/build.cjs",
+    "verify:media": "node scripts/verify-media.cjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "fonteditor-core": "2.6.3",
+    "sharp": "0.35.5"
+  }
+}

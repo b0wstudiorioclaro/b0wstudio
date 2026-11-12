@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, "../js/main.js"), "utf8");
 const consentCode = source.slice(source.indexOf("  function initLegalAndCookieModals()"), source.indexOf("  function setupCanvas("));
 const key = "b0w_cookie_preferences_v1";
 const categories = ["analytics", "functional", "marketing"];
-const savedValue = (enabled) => ({ version: 1, necessary: true, analytics: enabled, functional: enabled, marketing: enabled, updatedAt: "2026-11-01T00:00:00.000Z" });
+const savedValue = (enabled) => ({ version: 1, necessary: true, analytics: enabled, functional: enabled, marketing: enabled, updatedAt: new Date(Date.now() - 2 * 86400000).toISOString() });
 
 function element(dataset = {}) {
   const listeners = new Map();
@@ -140,7 +140,7 @@ test("invalid stored data does not hide the choice banner", () => {
 });
 
 test("the newest saved choice wins and repairs the older record", () => {
-  const newer = { ...savedValue(false), updatedAt: "2026-11-02T00:00:00.000Z" };
+  const newer = { ...savedValue(false), updatedAt: new Date(Date.now() - 86400000).toISOString() };
   for (const cookieIsNewer of [true, false]) {
     const state = {
       local: new Map([[key, JSON.stringify(cookieIsNewer ? savedValue(true) : newer)]]),
@@ -150,6 +150,20 @@ test("the newest saved choice wins and repairs the older record", () => {
     assert.equal(page.consent.has("marketing"), false);
     assert.equal(state.local.get(key), decodeURIComponent(state.cookies.get(key)));
   }
+});
+
+test("expired or future local choices cannot silently restore consent", () => {
+  for (const updatedAt of [new Date(Date.now() - 181 * 86400000).toISOString(), new Date(Date.now() + 86400000).toISOString(), "invalid"]) {
+    const record = JSON.stringify({ ...savedValue(true), updatedAt });
+    const page = openPage({ local: new Map([[key, record]]), cookies: new Map([[key, encodeURIComponent(record)]]) });
+    assert.equal(page.banner.hidden, false); assert.equal(page.consent.has("marketing"), false);
+  }
+});
+
+test("reading a choice does not renew its original expiration", () => {
+  const value = savedValue(false);
+  const page = openPage({ local: new Map([[key, JSON.stringify(value)]]), cookies: new Map() });
+  assert.match(page.cookieWrites.at(-1), /Max-Age=15379200;/);
 });
 
 test("local HTTP previews write cookies without the HTTPS-only attribute", () => {

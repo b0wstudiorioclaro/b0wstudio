@@ -1,0 +1,51 @@
+{
+  "attributes": {
+    "position": {
+      "itemSize": 3,
+      "length": 138294,
+      "sha256": "00d84aa7b6165853f272f1681193f41f9c49961238209331a539e6d5f3f32007"
+    },
+    "uv": {
+      "itemSize": 2,
+      "length": 92196,
+      "sha256": "47d5e25461807da10fed89d2cbf949d1584bacb67af4ece0e39bf0aa750bbadb"
+    },
+    "normal": {
+      "itemSize": 3,
+      "length": 138294,
+      "sha256": "bf09a9266192f343c32b848c8fdc01c4a338883513b87c23a3641e5a7b0d0446"
+    }
+  },
+  "groups": [
+    {
+      "start": 0,
+      "count": 1398,
+      "materialIndex": 0
+    },
+    {
+      "start": 1398,
+      "count": 12690,
+      "materialIndex": 1
+    },
+    {
+      "start": 14088,
+      "count": 2550,
+      "materialIndex": 0
+    },
+    {
+      "start": 16638,
+      "count": 23058,
+      "materialIndex": 1
+    },
+    {
+      "start": 39696,
+      "count": 624,
+      "materialIndex": 0
+    },
+    {
+      "start": 40320,
+      "count": 5778,
+      "materialIndex": 1
+    }
+  ]
+}

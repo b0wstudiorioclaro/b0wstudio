@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hasGSAP = typeof window.gsap !== "undefined";
   const CASES_READY = false; // troque para true quando as páginas /cases/<slug>.html existirem
 
-  const plugins = [window.DrawSVGPlugin, window.MorphSVGPlugin, window.ScrollTrigger, window.ScrollToPlugin, window.SplitText, window.TextPlugin].filter(Boolean);
+  const plugins = [window.DrawSVGPlugin, window.ScrollTrigger, window.ScrollToPlugin, window.SplitText].filter(Boolean);
   if (hasGSAP && plugins.length) window.gsap.registerPlugin(...plugins);
 
   initScrollbar();
@@ -17,10 +17,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   initBrandJourney();
   initMagnetic();
   initCaseTag();
-  initDotField();
   initParticles();
   initContactForm();
   initLegalAndCookieModals();
+  initFloatingWhatsApp();
   document.querySelector("#year").textContent = new Date().getFullYear();
   window.addEventListener("load", () => window.ScrollTrigger?.refresh());
 
@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!bar || !thumb) return;
 
     let frame = 0;
+    let geometryDirty = true;
     let metrics = { maxScroll: 0, maxTop: 0, thumbHeight: 0 };
     let drag = null;
 
@@ -151,6 +152,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const update = () => {
       frame = 0;
+      if (!geometryDirty) { positionThumb(getScrollTop()); return; }
+      geometryDirty = false;
       const root = document.documentElement;
       const viewport = window.innerHeight;
       const scrollHeight = Math.max(root.scrollHeight, document.body.scrollHeight);
@@ -170,6 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const requestUpdate = () => {
       if (!frame) frame = window.requestAnimationFrame(update);
     };
+    const requestMeasure = () => { geometryDirty = true; requestUpdate(); };
 
     const scrollFromPointer = (clientY) => {
       if (!drag || !metrics.maxTop) return;
@@ -226,11 +230,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     update();
     window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
-    window.addEventListener("load", requestUpdate);
-    window.ScrollTrigger?.addEventListener("refresh", requestUpdate);
+    window.addEventListener("resize", requestMeasure);
+    window.addEventListener("load", requestMeasure);
+    window.ScrollTrigger?.addEventListener("refresh", requestMeasure);
     if (window.ResizeObserver) {
-      const resizeObserver = new ResizeObserver(requestUpdate);
+      const resizeObserver = new ResizeObserver(requestMeasure);
       resizeObserver.observe(document.body);
       const content = document.querySelector("#smooth-content");
       if (content) resizeObserver.observe(content);
@@ -257,22 +261,34 @@ document.addEventListener("DOMContentLoaded", async () => {
   function initNavbar() {
     const nav = document.querySelector(".navbar");
     const sections = [...document.querySelectorAll("main > section[data-theme]")];
-    const update = () => {
-      const navHeight = nav.getBoundingClientRect().height || 78;
-      const probe = Math.min(window.innerHeight - 1, Math.max(1, navHeight * .5));
-      const current = [...sections].reverse().find((section) => {
+    let positions = [], probe = 39, frame = 0;
+    const measure = () => {
+      probe = Math.min(window.innerHeight - 1, Math.max(1, nav.getBoundingClientRect().height * .5));
+      const y = window.scrollY;
+      positions = sections.map(section => {
         const rect = section.getBoundingClientRect();
-        return rect.top <= probe && rect.bottom > probe;
+        return { top: rect.top + y, bottom: rect.bottom + y, theme: section.dataset.theme };
       });
-      nav.classList.toggle("is-dark", current?.dataset.theme !== "light");
+      update();
     };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY + probe;
+      const current = positions.findLast(section => section.top <= y && section.bottom > y);
+      nav.classList.toggle("is-dark", current?.theme !== "light");
+    };
+    measure();
+    window.addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });
+    window.addEventListener("resize", measure);
+    window.ScrollTrigger?.addEventListener("refresh", measure);
+    if (window.ResizeObserver) new ResizeObserver(measure).observe(document.querySelector("main"));
     document.querySelectorAll('a[href^="#"]').forEach((link) => link.addEventListener("click", (event) => {
       const href = link.getAttribute("href");
-      if (!href || href === "#" || !document.querySelector(href)) return;
+      if (!href || href === "#" || !document.getElementById(href.slice(1))) return;
       event.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (!target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
+      target.focus({ preventScroll: true });
       if (href === "#inicio") {
         window.gsap?.killTweensOf(window);
         if (hasGSAP && window.ScrollToPlugin && !reduceMotion) window.gsap.to(window, { duration: .9, scrollTo: { y: 0 }, ease: "power3.inOut" });
@@ -291,6 +307,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const homeLinks = [...document.querySelectorAll(".mobile-brand,.mobile-symbol-home")];
     if (!menu || !open || !close) return;
     let timeline = null;
+    let restoreBackground = () => {};
+    let closing = false;
     if (hasGSAP && !reduceMotion) {
       timeline = window.gsap.timeline({ paused: true, defaults: { ease: "power4.out" } })
         .set(menu, { visibility: "visible", pointerEvents: "auto" })
@@ -299,16 +317,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         .from(".mobile-menu-foot", { y: 18, opacity: 0, duration: .5 }, "-=.45");
     }
     const show = () => {
+      closing = false;
+      timeline?.eventCallback("onReverseComplete", null);
+      menu.inert = false;
       menu.classList.add("is-open"); menu.setAttribute("aria-hidden", "false"); open.setAttribute("aria-expanded", "true"); document.body.classList.add("menu-open");
       if (timeline) { window.gsap.set(menu, { opacity: 0, clipPath: "inset(0% 0% 100% 0%)" }); timeline.restart(); }
       close.focus({ preventScroll: true });
+      restoreBackground = isolateDialog(menu);
     };
-    const hide = () => {
-      const done = () => { menu.classList.remove("is-open"); menu.setAttribute("aria-hidden", "true"); open.setAttribute("aria-expanded", "false"); document.body.classList.remove("menu-open"); };
+    const hide = (event) => {
+      if (closing) return;
+      closing = true;
+      const href = event?.currentTarget?.getAttribute?.("href");
+      const destination = href?.startsWith("#") ? document.getElementById(href.slice(1)) : null;
+      const done = () => {
+        restoreBackground();
+        if (destination) destination.focus({ preventScroll: true });
+        else if (menu.contains(document.activeElement)) open.focus({ preventScroll: true });
+        menu.inert = true; menu.classList.remove("is-open"); menu.setAttribute("aria-hidden", "true"); open.setAttribute("aria-expanded", "false"); document.body.classList.remove("menu-open"); closing = false;
+      };
       if (timeline) timeline.reverse().eventCallback("onReverseComplete", done); else done();
     };
     open.addEventListener("click", show); close.addEventListener("click", hide); [...links, ...homeLinks].forEach((link) => link.addEventListener("click", hide));
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && menu.classList.contains("is-open")) hide(); });
+    document.addEventListener("keydown", (event) => {
+      if (!menu.classList.contains("is-open")) return;
+      if (event.key === "Escape") { event.preventDefault(); hide(); }
+      else trapDialogFocus(event, menu);
+    });
+    window.matchMedia("(min-width: 993px)").addEventListener("change", event => { if (event.matches && menu.classList.contains("is-open")) hide(); });
   }
 
   function initHero() {
@@ -316,7 +352,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!hero || !hasGSAP || reduceMotion) return null;
     const g = window.gsap;
     const lines = [...hero.querySelectorAll(".bh-title > span")];
-    const chars = window.SplitText ? lines.flatMap((line) => new window.SplitText(line, { type: "chars", charsClass: "bh-char" }).chars) : lines;
+    const chars = window.SplitText ? lines.flatMap((line) => new window.SplitText(line, { type: "chars", charsClass: "bh-char", aria: "none" }).chars) : lines;
+    lines.forEach(line => line.setAttribute("aria-hidden", "true"));
 
     g.set(".navbar", { y: -20, opacity: 0 });
     g.set(chars, { yPercent: 115, rotationX: -70, opacity: 0, filter: "blur(14px)", transformOrigin: "50% 100%" });
@@ -327,7 +364,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const timeline = g.timeline({ paused: true, defaults: { ease: "power4.out" } })
       .to(".navbar", { y: 0, opacity: 1, duration: .55 }, 0)
       .to("#hero-3d", { opacity: 1, scale: 1, duration: 1.4, ease: "power3.out" }, .1)
-      .to(chars, { yPercent: 0, rotationX: 0, opacity: 1, filter: "blur(0px)", duration: .9, stagger: .03, onComplete: () => g.set(chars, { clearProps: "transform,opacity,filter" }) }, .25)
+      .to(chars, { yPercent: 0, rotationX: 0, opacity: 1, filter: "blur(0px)", duration: .9, stagger: .03, onComplete: () => { g.set(chars, { clearProps: "transform,opacity,filter" }); chars.forEach(char => { char.style.willChange = "auto"; }); } }, .25)
       .to(".bh-lead", { y: 0, opacity: 1, duration: .7 }, .7)
       .to(".bh-actions > *", { y: 0, opacity: 1, stagger: .08, duration: .6 }, .82);
 
@@ -351,12 +388,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (CASES_READY) { window.location.href = `cases/${card.dataset.case}.html`; return; }
       if (!label) return;
       label.textContent = "Cases em breve";
+      document.querySelector("[data-case-status]").textContent = `Cases de ${card.querySelector("h3").textContent} em breve.`;
       window.clearTimeout(soonTimer);
       soonTimer = window.setTimeout(() => { label.textContent = text; }, 1500);
     };
     cards.forEach((card) => {
       card.addEventListener("click", () => open(card));
-      card.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(card); } });
     });
     if (!tag || isTouch || !window.matchMedia("(hover: hover)").matches) return;
 
@@ -365,7 +402,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tick = () => {
       x += (mx - x) * .22; y += (my - y) * .22;
       tag.style.transform = `translate3d(${x}px,${y}px,0)`;
-      frame = active || Math.abs(mx - x) > .5 || Math.abs(my - y) > .5 ? window.requestAnimationFrame(tick) : 0;
+      frame = Math.abs(mx - x) > .5 || Math.abs(my - y) > .5 ? window.requestAnimationFrame(tick) : 0;
     };
     cards.forEach((card) => {
       card.addEventListener("pointerenter", (event) => { mx = x = event.clientX; my = y = event.clientY; tag.classList.toggle("is-light", dark(card)); tag.classList.add("is-on"); active = true; if (!frame) frame = window.requestAnimationFrame(tick); });
@@ -403,8 +440,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       ".footer-meta p"
     ].join(",");
 
-    window.gsap.utils.toArray(selector).forEach((element) => {
-      const split = window.SplitText && !element.matches(".text-link") ? new window.SplitText(element, { type: "words", wordsClass: "blur-word" }) : null;
+    const prepare = (element) => {
+      const split = window.SplitText && !element.matches(".text-link") ? new window.SplitText(element, { type: "words", wordsClass: "blur-word", aria: "none" }) : null;
       const isHeading = element.matches("h2,h3,strong,.section-title,.display-title,.about-lead");
       const words = split?.words?.length ? split.words : [element];
 
@@ -420,16 +457,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         onReverseComplete: () => window.gsap.set(words, { clearProps: "willChange" }),
         scrollTrigger: bidirectionalTrigger(element)
       });
-    });
+    };
+    // Prepare before the original 88% trigger, keeping the same reveal/reverse timeline.
+    const elements = window.gsap.utils.toArray(selector);
+    if (!window.IntersectionObserver) { elements.forEach(prepare); return; }
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        prepare(entry.target);
+      });
+    }, { rootMargin: "100% 0px" });
+    elements.forEach(element => observer.observe(element));
   }
 
   function initServices() {
     const cards = [...document.querySelectorAll(".service-card")];
-    cards.forEach((card) => card.addEventListener("pointermove", (event) => {
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty("--spot-x", `${((event.clientX - rect.left) / rect.width) * 100}%`);
-      card.style.setProperty("--spot-y", `${((event.clientY - rect.top) / rect.height) * 100}%`);
-    }, { passive: true }));
+    cards.forEach(card => {
+      let frame = 0, x = 0, y = 0;
+      card.addEventListener("pointermove", event => {
+        x = event.clientX; y = event.clientY;
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          const rect = card.getBoundingClientRect();
+          card.style.setProperty("--spot-x", `${((x - rect.left) / rect.width) * 100}%`);
+          card.style.setProperty("--spot-y", `${((y - rect.top) / rect.height) * 100}%`);
+        });
+      }, { passive: true });
+    });
 
     const galleries = cards.map((card) => ({
       card,
@@ -459,10 +515,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       }, 5200);
 
-      window.addEventListener("pagehide", () => {
+      window.addEventListener("pagehide", event => {
+        if (event.persisted) return;
         window.clearInterval(cycleTimer);
         visibilityObserver?.disconnect();
-      }, { once: true });
+      });
     }
 
     if (!hasGSAP || !window.ScrollTrigger || reduceMotion) return;
@@ -569,73 +626,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  function initBrandPosterTabs() {
-    const section = document.querySelector(".brand-poster");
-    const tabs = [...(section?.querySelectorAll(".brand-poster-tabs li") || [])];
-    if (!section || !tabs.length || isTouch) return;
-
-    const focusCard = document.createElement("span");
-    focusCard.className = "brand-poster-tab-focus-card";
-    focusCard.setAttribute("aria-hidden", "true");
-    document.body.appendChild(focusCard);
-
-    let focusedTab = null;
-    let focusFrame = 0;
-
-    const setFocusOrigin = (tab) => {
-      const label = tab.querySelector("span");
-      if (!label) return;
-      const rect = label.getBoundingClientRect();
-      focusCard.textContent = label.textContent;
-      focusCard.style.setProperty("--tab-origin-x", `${rect.left + rect.width / 2}px`);
-      focusCard.style.setProperty("--tab-origin-y", `${rect.top + rect.height / 2}px`);
-      focusCard.style.setProperty("--tab-origin-width", `${rect.width}px`);
-      focusCard.style.setProperty("--tab-origin-height", `${rect.height}px`);
-    };
-
-    const focusTab = (tab) => {
-      window.cancelAnimationFrame(focusFrame);
-      focusedTab = tab;
-      tabs.forEach((item) => item.classList.toggle("is-focused", item === tab));
-      setFocusOrigin(tab);
-      focusCard.classList.remove("is-visible");
-      focusCard.getBoundingClientRect();
-      section.classList.add("is-tab-focused");
-      focusFrame = window.requestAnimationFrame(() => focusCard.classList.add("is-visible"));
-    };
-
-    const releaseTab = (tab) => {
-      if (focusedTab !== tab) return;
-      window.cancelAnimationFrame(focusFrame);
-      focusedTab = null;
-      tab.classList.remove("is-focused");
-      section.classList.remove("is-tab-focused");
-      focusCard.classList.remove("is-visible");
-    };
-
-    tabs.forEach((tab) => {
-      tab.addEventListener("mouseenter", () => focusTab(tab));
-      tab.addEventListener("mouseleave", () => releaseTab(tab));
-    });
-
-    window.addEventListener("resize", () => {
-      if (focusedTab) setFocusOrigin(focusedTab);
-    });
-  }
-
-  function initCursor() {
-    if (isTouch || !window.matchMedia("(hover: hover)").matches) return;
-    const cursor = document.querySelector(".cursor"); const label = cursor?.querySelector("span"); if (!cursor || !label) return;
-    let mx = -100, my = -100, x = -100, y = -100;
-    window.addEventListener("mousemove", (event) => { mx = event.clientX; my = event.clientY; }, { passive: true });
-    const render = () => { x += (mx - x) * .18; y += (my - y) * .18; cursor.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`; requestAnimationFrame(render); }; render();
-    document.querySelectorAll("[data-cursor]").forEach((item) => { item.addEventListener("mouseenter", () => { label.textContent = item.dataset.cursor; cursor.classList.add("is-view"); }); item.addEventListener("mouseleave", () => cursor.classList.remove("is-view")); });
-    document.querySelectorAll("a,button").forEach((item) => { item.addEventListener("mouseenter", () => cursor.classList.add("is-button")); item.addEventListener("mouseleave", () => cursor.classList.remove("is-button")); });
-  }
-
   function initMagnetic() {
     if (isTouch || reduceMotion || !hasGSAP) return;
     document.querySelectorAll(".magnetic").forEach((button) => { button.addEventListener("mousemove", (event) => { const rect = button.getBoundingClientRect(); window.gsap.to(button, { x: (event.clientX - rect.left - rect.width / 2) * .1, y: (event.clientY - rect.top - rect.height / 2) * .14, duration: .35, ease: "power3.out" }); }); button.addEventListener("mouseleave", () => window.gsap.to(button, { x: 0, y: 0, duration: .6, ease: "power3.out" })); });
+  }
+
+  function isolateDialog(dialog) {
+    const siblings = [...document.body.children].filter(element => element !== dialog && !element.matches("script,style"));
+    const states = siblings.map(element => element.inert);
+    siblings.forEach(element => { element.inert = true; });
+    return () => siblings.forEach((element, index) => { element.inert = states[index]; });
+  }
+
+  function trapDialogFocus(event, dialog) {
+    if (event.key !== "Tab") return;
+    const controls = [...dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),[tabindex="0"]')].filter(element => element.getClientRects().length);
+    const index = controls.indexOf(document.activeElement);
+    if (event.shiftKey && index <= 0) { event.preventDefault(); controls.at(-1)?.focus(); }
+    else if (!event.shiftKey && (index === -1 || index === controls.length - 1)) { event.preventDefault(); controls[0]?.focus(); }
+  }
+
+  function initFloatingWhatsApp() {
+    const link = document.querySelector(".whatsapp-float");
+    if (!link) return;
+    const banner = document.querySelector("[data-cookie-banner]");
+    // The mobile hero reserves space below its CTAs for the fixed corner button.
+    const controls = [...document.querySelectorAll('.contact-panel input:not([type="hidden"]),.contact-panel textarea,.contact-panel button,.footer a,.footer button')];
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const own = link.getBoundingClientRect();
+      const gap = 8;
+      const safeBottom = parseFloat(getComputedStyle(link).bottom) || 20;
+      const rects = controls.map(control => control.getBoundingClientRect()).filter(rect => rect.width && rect.top < innerHeight && rect.bottom > 0);
+      if (banner && !banner.hidden) {
+        const rect = banner.getBoundingClientRect();
+        const settledTop = innerHeight - (parseFloat(getComputedStyle(banner).bottom) || 0) - banner.offsetHeight;
+        rects.push({ left: rect.left, right: rect.right, top: Math.min(rect.top, settledTop), bottom: rect.bottom });
+      }
+      let bottom = innerHeight - safeBottom;
+      let top = bottom - own.height;
+      // All reads precede the single write. Only move when an actual control overlaps.
+      for (let i = 0; i <= rects.length; i++) {
+        const hit = rects.find(rect => rect.right > own.left && rect.left < own.right && rect.bottom > top - gap && rect.top < bottom + gap);
+        if (!hit) break;
+        bottom = hit.top - gap; top = bottom - own.height;
+      }
+      link.style.transform = `translateY(${Math.min(0, bottom - (innerHeight - safeBottom))}px)`;
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    addEventListener("scroll", schedule, { passive: true });
+    addEventListener("resize", schedule);
+    if (banner) {
+      new MutationObserver(schedule).observe(banner, { attributes: true, attributeFilter: ["hidden", "class"] });
+      new ResizeObserver(schedule).observe(banner);
+      banner.addEventListener("transitionend", schedule);
+      banner.addEventListener("animationend", schedule);
+    }
+    schedule();
   }
 
   function initContactForm() {
@@ -715,6 +763,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const data = new FormData(form);
+      if (String(data.get("_honey") || "").trim()) return;
       const company = String(data.get("Empresa") || "").trim();
       const email = String(data.get("email") || "").trim();
       const message = String(data.get("Sobre o negócio") || "").trim();
@@ -747,7 +796,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify(Object.fromEntries(data)),
+          // Explicit allowlist: never forward injected provider options or extra fields.
+          body: JSON.stringify(Object.fromEntries([
+            "Nome", "Empresa", "email", "Celular", "Sobre o negócio", "Serviços desejados",
+            "_replyto", "_subject", "_template", "_url", "_captcha", "_honey"
+          ].map(key => [key, data.get(key)]))),
+          credentials: "omit",
+          cache: "no-store",
+          redirect: "error",
+          referrerPolicy: "origin",
           signal: controller.signal
         });
         const result = await response.json().catch(() => null);
@@ -789,12 +846,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     let returnFocus = null;
     let savedScrollY = 0;
     let closeTimer = 0;
+    let restoreBackground = () => {};
+    let closing = false;
+    const preferenceLifetime = 180 * 86400000;
 
     const parsePreferences = (raw) => {
       try {
         const saved = JSON.parse(raw || "null");
-        return saved?.version === 1 && ["analytics", "functional", "marketing"].every((category) => typeof saved[category] === "boolean")
-          ? { ...defaults, ...saved, necessary: true } : null;
+        const savedAt = Date.parse(saved?.updatedAt);
+        const validAge = Number.isFinite(savedAt) && savedAt <= Date.now() + 300000 && Date.now() - savedAt < preferenceLifetime;
+        return saved?.version === 1 && validAge && ["analytics", "functional", "marketing"].every((category) => typeof saved[category] === "boolean")
+          ? { ...defaults, analytics: saved.analytics, functional: saved.functional, marketing: saved.marketing, updatedAt: saved.updatedAt } : null;
       } catch (error) {
         return null;
       }
@@ -831,7 +893,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       } catch (error) { /* Fall back to the necessary preference cookie. */ }
       try {
         const secure = window.location.protocol === "https:" ? "; Secure" : "";
-        document.cookie = `${storageKey}=${encodeURIComponent(serialized)}; Max-Age=15552000; Path=/; SameSite=Lax${secure}`;
+        const remainingSeconds = Math.max(0, Math.ceil((Date.parse(value.updatedAt) + preferenceLifetime - Date.now()) / 1000));
+        document.cookie = `${storageKey}=${encodeURIComponent(serialized)}; Max-Age=${remainingSeconds}; Path=/; SameSite=Lax${secure}`;
         cookieSaved = readCookie() === serialized;
       } catch (error) { /* Local storage can still preserve the choice. */ }
       return localSaved || cookieSaved;
@@ -894,6 +957,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const modal = modals.get(name);
       if (!modal) return;
       window.clearTimeout(closeTimer);
+      closing = false;
       if (!activeModal) {
         returnFocus = trigger || document.activeElement;
         lockBackground();
@@ -904,19 +968,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       activeModal = modal;
       if (name === "preferences") syncPreferenceControls();
       modal.hidden = false;
+      restoreBackground();
       window.requestAnimationFrame(() => {
+        if (activeModal !== modal) return;
         modal.classList.add("is-open");
         modal.querySelector(".legal-dialog")?.focus({ preventScroll: true });
+        restoreBackground = isolateDialog(modal);
       });
     };
 
     const hideModal = () => {
-      if (!activeModal) return;
+      if (!activeModal || closing) return;
       const modal = activeModal;
-      activeModal = null;
+      closing = true;
       modal.classList.remove("is-open");
       const finish = () => {
         modal.hidden = true;
+        activeModal = null;
+        closing = false;
+        restoreBackground();
         unlockBackground();
         if (returnFocus instanceof HTMLElement && document.contains(returnFocus)) returnFocus.focus({ preventScroll: true });
         returnFocus = null;
@@ -976,7 +1046,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         activateConsentedScripts(value);
       } catch (error) {
-        console.error("As preferências foram salvas, mas uma integração opcional não pôde ser iniciada.", error);
+        console.error("As preferências foram salvas, mas uma integração opcional não pôde ser iniciada.");
       }
     };
 
@@ -1023,18 +1093,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const resize = () => { const rect = canvas.getBoundingClientRect(); state.width = rect.width; state.height = rect.height; canvas.width = Math.round(rect.width * state.dpr); canvas.height = Math.round(rect.height * state.dpr); context.setTransform(state.dpr, 0, 0, state.dpr, 0, 0); }; resize(); window.addEventListener("resize", resize); return { context, state };
   }
 
-  function initDotField() {
-    const canvas = document.querySelector(".dot-field"); if (!canvas || reduceMotion) return; const setup = setupCanvas(canvas); if (!setup) return; const { context, state } = setup; const mouse = { x: -999, y: -999 }; let visible = true;
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(canvas.parentElement);
-    canvas.parentElement.addEventListener("pointermove", (event) => { mouse.x = event.clientX; mouse.y = event.clientY; }, { passive: true }); canvas.parentElement.addEventListener("pointerleave", () => { mouse.x = -999; mouse.y = -999; });
-    const draw = () => { if (visible && !document.hidden) { context.clearRect(0, 0, state.width, state.height); const gap = state.width < 600 ? 27 : 32; for (let py = gap; py < state.height; py += gap) for (let px = gap; px < state.width; px += gap) { const dx = px - mouse.x, dy = py - mouse.y, distance = Math.hypot(dx, dy), influence = Math.max(0, 1 - distance / 210), shift = influence * 11; context.beginPath(); context.arc(px + (distance ? dx / distance : 0) * shift, py + (distance ? dy / distance : 0) * shift, .72 + influence * 1.35, 0, Math.PI * 2); context.fillStyle = `rgba(255,255,255,${.16 + influence * .42})`; context.fill(); } } requestAnimationFrame(draw); }; draw();
-  }
-
   function initParticles() {
-    const canvas = document.querySelector(".particles-canvas"); if (!canvas || reduceMotion) return; const setup = setupCanvas(canvas); if (!setup) return; const { context, state } = setup; let particles = [], visible = false; const pointer = { x: -999, y: -999 };
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(canvas.parentElement);
+    const canvas = document.querySelector(".particles-canvas"); if (!canvas || reduceMotion) return; const setup = setupCanvas(canvas); if (!setup) return; const { context, state } = setup; let particles = [], visible = false, frame = 0; const pointer = { x: -999, y: -999 };
+    const syncLoop = () => { cancelAnimationFrame(frame); frame = 0; if (visible && !document.hidden) frame = requestAnimationFrame(draw); };
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncLoop(); }).observe(canvas.parentElement);
+    document.addEventListener("visibilitychange", syncLoop);
     const build = () => { particles = Array.from({ length: Math.min(55, Math.max(24, Math.floor(state.width / 28))) }, () => ({ x: Math.random() * state.width, y: Math.random() * state.height, vx: (Math.random() - .5) * .07, vy: (Math.random() - .5) * .07, radius: Math.random() * .8 + .3, alpha: Math.random() * .22 + .06 })); }; build(); window.addEventListener("resize", build);
     canvas.parentElement.addEventListener("pointermove", (event) => { const rect = canvas.getBoundingClientRect(); pointer.x = event.clientX - rect.left; pointer.y = event.clientY - rect.top; }, { passive: true });
-    const draw = () => { if (visible && !document.hidden) { context.clearRect(0, 0, state.width, state.height); particles.forEach((p) => { const dx = p.x - pointer.x, dy = p.y - pointer.y, distance = Math.hypot(dx, dy); if (distance < 100 && distance) { p.x += dx / distance * .07; p.y += dy / distance * .07; } p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = state.width; if (p.x > state.width) p.x = 0; if (p.y < 0) p.y = state.height; if (p.y > state.height) p.y = 0; context.beginPath(); context.arc(p.x, p.y, p.radius, 0, Math.PI * 2); context.fillStyle = `rgba(255,255,255,${p.alpha})`; context.fill(); }); } requestAnimationFrame(draw); }; draw();
+    const draw = () => { context.clearRect(0, 0, state.width, state.height); particles.forEach((p) => { const dx = p.x - pointer.x, dy = p.y - pointer.y, distance = Math.hypot(dx, dy); if (distance < 100 && distance) { p.x += dx / distance * .07; p.y += dy / distance * .07; } p.x += p.vx; p.y += p.vy; if (p.x < 0) p.x = state.width; if (p.x > state.width) p.x = 0; if (p.y < 0) p.y = state.height; if (p.y > state.height) p.y = 0; context.beginPath(); context.arc(p.x, p.y, p.radius, 0, Math.PI * 2); context.fillStyle = `rgba(255,255,255,${p.alpha})`; context.fill(); }); frame = requestAnimationFrame(draw); };
   }
 });

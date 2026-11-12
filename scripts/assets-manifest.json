@@ -1,0 +1,360 @@
+{
+  "images": {
+    "ASSETS/SERVICES/landing-pages-generated.jpg": {
+      "width": 1536,
+      "height": 1024,
+      "originalBytes": 140415,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/landing-pages-generated-480-5fa97b335d02.webp",
+          "bytes": 70046
+        },
+        {
+          "width": 1536,
+          "src": "ASSETS/SERVICES/landing-pages-generated.jpg",
+          "bytes": 140415
+        }
+      ]
+    },
+    "ASSETS/SERVICES/landing-pages-generated-v2.jpg": {
+      "width": 1536,
+      "height": 1024,
+      "originalBytes": 202223,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/landing-pages-generated-v2-480-268e440167e0.webp",
+          "bytes": 116904
+        },
+        {
+          "width": 1536,
+          "src": "ASSETS/SERVICES/landing-pages-generated-v2.jpg",
+          "bytes": 202223
+        }
+      ]
+    },
+    "ASSETS/SERVICES/identidade-visual-generated.jpg": {
+      "width": 1536,
+      "height": 1024,
+      "originalBytes": 177608,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/identidade-visual-generated-480-bd22432702ed.webp",
+          "bytes": 95804
+        },
+        {
+          "width": 1536,
+          "src": "ASSETS/SERVICES/identidade-visual-generated.jpg",
+          "bytes": 177608
+        }
+      ]
+    },
+    "ASSETS/SERVICES/identidade-visual-generated-v2.jpg": {
+      "width": 1536,
+      "height": 1024,
+      "originalBytes": 243955,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/identidade-visual-generated-v2-480-25a8281a4831.webp",
+          "bytes": 127114
+        },
+        {
+          "width": 1536,
+          "src": "ASSETS/SERVICES/identidade-visual-generated-v2.jpg",
+          "bytes": 243955
+        }
+      ]
+    },
+    "ASSETS/SERVICES/social-media-strategy.jpg": {
+      "width": 1536,
+      "height": 1024,
+      "originalBytes": 231730,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/social-media-strategy-480-205d42f3c42a.webp",
+          "bytes": 94872
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/social-media-strategy-768-b0d9f5deb713.webp",
+          "bytes": 210230
+        },
+        {
+          "width": 1536,
+          "src": "ASSETS/SERVICES/social-media-strategy.jpg",
+          "bytes": 231730
+        }
+      ]
+    },
+    "ASSETS/SERVICES/social-media-community.jpg": {
+      "width": 1855,
+      "height": 848,
+      "originalBytes": 253435,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/social-media-community-480-d3e4f36a79b8.webp",
+          "bytes": 105184
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/social-media-community-768-dc5d664bbdb8.webp",
+          "bytes": 239954
+        },
+        {
+          "width": 1855,
+          "src": "ASSETS/SERVICES/social-media-community.jpg",
+          "bytes": 253435
+        }
+      ]
+    },
+    "ASSETS/SERVICES/captacao-edicao-generated.jpg": {
+      "width": 1726,
+      "height": 911,
+      "originalBytes": 155685,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/captacao-edicao-generated-480-3bf99222c499.webp",
+          "bytes": 82948
+        },
+        {
+          "width": 1726,
+          "src": "ASSETS/SERVICES/captacao-edicao-generated.jpg",
+          "bytes": 155685
+        }
+      ]
+    },
+    "ASSETS/SERVICES/captacao-edicao-generated-v2.jpg": {
+      "width": 1672,
+      "height": 941,
+      "originalBytes": 167847,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/captacao-edicao-generated-v2-480-9e72d8087438.webp",
+          "bytes": 63666
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/captacao-edicao-generated-v2-768-cbcfa42d8b48.webp",
+          "bytes": 141810
+        },
+        {
+          "width": 1672,
+          "src": "ASSETS/SERVICES/captacao-edicao-generated-v2.jpg",
+          "bytes": 167847
+        }
+      ]
+    },
+    "ASSETS/SERVICES/trafego-pago-generated.jpg": {
+      "width": 1571,
+      "height": 1001,
+      "originalBytes": 197248,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/trafego-pago-generated-480-5c8b1dce8934.webp",
+          "bytes": 92296
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/trafego-pago-generated-768-0072a9e91d38.webp",
+          "bytes": 194324
+        },
+        {
+          "width": 1571,
+          "src": "ASSETS/SERVICES/trafego-pago-generated.jpg",
+          "bytes": 197248
+        }
+      ]
+    },
+    "ASSETS/SERVICES/trafego-pago-generated-v2.jpg": {
+      "width": 1695,
+      "height": 928,
+      "originalBytes": 178842,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/trafego-pago-generated-v2-480-755d0687a0b4.webp",
+          "bytes": 66298
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/trafego-pago-generated-v2-768-6fa43edac5c8.webp",
+          "bytes": 142188
+        },
+        {
+          "width": 1695,
+          "src": "ASSETS/SERVICES/trafego-pago-generated-v2.jpg",
+          "bytes": 178842
+        }
+      ]
+    },
+    "ASSETS/ALEX.png": {
+      "width": 1122,
+      "height": 1402,
+      "originalBytes": 1833610,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/ALEX-480-8f46333c4dd5.webp",
+          "bytes": 243702
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/ALEX-768-819a1a262593.webp",
+          "bytes": 647338
+        },
+        {
+          "width": 1024,
+          "src": "ASSETS/optimized/ALEX-1024-ee24bc4558d5.webp",
+          "bytes": 1131720
+        },
+        {
+          "width": 1122,
+          "src": "ASSETS/optimized/ALEX-1122-1fc1535fe85d.webp",
+          "bytes": 1295696
+        }
+      ]
+    },
+    "ASSETS/JULIO.png": {
+      "width": 1122,
+      "height": 1402,
+      "originalBytes": 1817941,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/JULIO-480-1efc06e231c3.webp",
+          "bytes": 239432
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/JULIO-768-9424788c691b.webp",
+          "bytes": 656876
+        },
+        {
+          "width": 1024,
+          "src": "ASSETS/optimized/JULIO-1024-8034c075a427.webp",
+          "bytes": 1125278
+        },
+        {
+          "width": 1122,
+          "src": "ASSETS/optimized/JULIO-1122-a29d7ae7a47e.webp",
+          "bytes": 1277604
+        }
+      ]
+    },
+    "ASSETS/DAVI.png": {
+      "width": 1122,
+      "height": 1402,
+      "originalBytes": 1719141,
+      "variants": [
+        {
+          "width": 480,
+          "src": "ASSETS/optimized/DAVI-480-818647547043.webp",
+          "bytes": 237648
+        },
+        {
+          "width": 768,
+          "src": "ASSETS/optimized/DAVI-768-ef10d90252b4.webp",
+          "bytes": 616980
+        },
+        {
+          "width": 1024,
+          "src": "ASSETS/optimized/DAVI-1024-4a588fb8b30e.webp",
+          "bytes": 1063882
+        },
+        {
+          "width": 1122,
+          "src": "ASSETS/optimized/DAVI-1122-e62ef87f5217.webp",
+          "bytes": 1209282
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-clareza.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 26504,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-clareza-270-21246c8cb22b.webp",
+          "bytes": 11882
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-direcao.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 34423,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-direcao-270-a081eb96a746.webp",
+          "bytes": 16206
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-confianca.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 29390,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-confianca-270-99cc9d12c4a7.webp",
+          "bytes": 12962
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-estrategia.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 20803,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-estrategia-270-5de5868a836e.webp",
+          "bytes": 8860
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-posicionamento.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 34321,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-posicionamento-270-effe386226f0.webp",
+          "bytes": 15294
+        }
+      ]
+    },
+    "ASSETS/pillars/pillar-consistencia.png": {
+      "width": 270,
+      "height": 270,
+      "originalBytes": 28226,
+      "variants": [
+        {
+          "width": 270,
+          "src": "ASSETS/optimized/pillar-consistencia-270-8fa0bc0b0713.webp",
+          "bytes": 12716
+        }
+      ]
+    }
+  },
+  "fonts": {
+    "ClashDisplay-Bold.otf": "ASSETS/fonts/ClashDisplay-Bold-aee84bf2818a.woff2",
+    "ClashDisplay-Extralight.otf": "ASSETS/fonts/ClashDisplay-Extralight-0081c55ff261.woff2",
+    "ClashDisplay-Light.otf": "ASSETS/fonts/ClashDisplay-Light-5f7a4aca4963.woff2",
+    "ClashDisplay-Medium.otf": "ASSETS/fonts/ClashDisplay-Medium-ef1dc0dbd18f.woff2",
+    "ClashDisplay-Regular.otf": "ASSETS/fonts/ClashDisplay-Regular-83d639479848.woff2",
+    "ClashDisplay-Semibold.otf": "ASSETS/fonts/ClashDisplay-Semibold-5271b81f6d40.woff2"
+  }
+}

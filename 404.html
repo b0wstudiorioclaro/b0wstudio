@@ -2,12 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="base-uri 'none'; object-src 'none'; form-action 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-nHbI/5F/pezIHYDFyjTumQQU+7HZJaKD1OkvYWMyVwQ='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://formsubmit.co; worker-src 'self'; base-uri 'none'; object-src 'none'; form-action https://formsubmit.co; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#e2e7ed">
   <meta name="robots" content="noindex,follow">
   <meta name="description" content="Página não encontrada — B0w Studio.">
+  <link rel="preload" href="ASSETS/fonts/ClashDisplay-Medium-ef1dc0dbd18f.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="ASSETS/fonts/Satoshi-400.woff2" as="font" type="font/woff2" crossorigin>
   <title>Página não encontrada | B0w Studio</title>
   <link rel="icon" type="image/svg+xml" href="ASSETS/SIMBOLO%20BOW%20BRANCA.svg">
   <link rel="stylesheet" href="css/404.css">
@@ -41,12 +43,10 @@
     <a href="index.html#contato">Vamos conversar <span aria-hidden="true">↗</span></a>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
-  <script src="js/symbol.js"></script>
-  <script src="js/hero3d.js"></script>
+  <script defer src="js/hero-loader.js"></script>
   <script>
     document.getElementById('error-year').textContent = new Date().getFullYear();
-    window.BOWHero?.start?.();
+    document.addEventListener('DOMContentLoaded', () => window.BOWHero?.start?.(), { once: true });
   </script>
 </body>
 </html>

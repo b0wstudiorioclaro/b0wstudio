@@ -1,12 +1,31 @@
 /* B0w Studio logo 3D da hero (Three.js).
    Padrão: diagonal de 45°, girando de lado em loop. Mouse EM CIMA da logo: clique = pulo, arrastar = gira na mão.
    Saiu do mouse: volta ao padrão. */
-(() => {
+(async () => {
   const TILT_Z = 45, TILT_X = 10, SPIN = .55;
   const hero = document.querySelector('.bow-hero'), canvas = document.getElementById('hero-3d');
   if (!hero || !canvas || !window.THREE || !window.BOW_SYMBOL) return;
   const standalone404 = hero.classList.contains('error-visual');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let started = standalone404, P = 0;
+  window.BOWHero = { start() { started = true; }, setProgress(v) { P = v; } };
+  const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
+  // Identical geometry, transferred from a worker without copying the buffers.
+  const geometryReady = new Promise(resolve => {
+    let worker;
+    const finish = value => { clearTimeout(timeout); worker?.terminate(); resolve(value); };
+    const timeout = setTimeout(() => finish(null), 10000);
+    try {
+      const scriptURL = new URL(document.currentScript.src);
+      const workerURL = new URL('geometry-worker.js', scriptURL);
+      workerURL.search = scriptURL.search;
+      worker = new Worker(workerURL);
+      worker.onmessage = event => finish(event.data);
+      worker.onerror = () => finish(null);
+      worker.postMessage({ build: true });
+    } catch { finish(null); }
+  });
+  await yieldToBrowser();
 
   let renderer;
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' }); }
@@ -18,6 +37,8 @@
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, .1, 100); camera.position.z = 14;
+
+  await yieldToBrowser();
 
   (() => { // estúdio claro -> reflexos no preto polido
     const c = document.createElement('canvas'); c.width = 1024; c.height = 512; const g = c.getContext('2d');
@@ -37,8 +58,18 @@
   pts.forEach((p) => p.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }));
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, K = 4.2 / (x1 - x0);
   const shapes = pts.map((p) => { const s = new THREE.Shape(); p.forEach(([x, y], i) => { const X = (x - cx) * K, Y = -(y - cy) * K; i ? s.lineTo(X, Y) : s.moveTo(X, Y); }); return s; });
-  const geo = new THREE.ExtrudeGeometry(shapes, { depth: .5, bevelEnabled: true, bevelThickness: .045, bevelSize: .035, bevelSegments: 4, curveSegments: 1 });
-  geo.translate(0, 0, -.25); geo.computeVertexNormals();
+  const built = await geometryReady;
+  let geo;
+  if (built) {
+    geo = new THREE.BufferGeometry();
+    Object.entries(built.attributes).forEach(([name, value]) => geo.setAttribute(name, new THREE.BufferAttribute(value.array, value.itemSize)));
+    geo.groups = built.groups;
+  } else {
+    // Retain the original path if workers are unavailable.
+    await yieldToBrowser();
+    geo = new THREE.ExtrudeGeometry(shapes, { depth: .5, bevelEnabled: true, bevelThickness: .045, bevelSize: .035, bevelSegments: 4, curveSegments: 1 });
+    geo.translate(0, 0, -.25); geo.computeVertexNormals();
+  }
   const mesh = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: 0x0c0c0e, metalness: .9, roughness: .2, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: 1.25 }));
 
   // pitch > giro lateral (Y) > inclinação diagonal (Z) > logo
@@ -69,7 +100,7 @@
 
   /* ---- interação: só quando o mouse está EM CIMA da logo ---- */
   const ray = new THREE.Raycaster(), m2 = new THREE.Vector2(), clampN = (v, a, b) => Math.min(b, Math.max(a, v));
-  let hover = false, dragging = false, moved = 0, downAt = 0, lx = 0, ly = 0, vel = 0, pitchOff = 0, spinBase = 0, spd = 1, jumpT = -1, P = 0, started = false, intro = 0;
+  let hover = false, dragging = false, moved = 0, downAt = 0, lx = 0, ly = 0, vel = 0, pitchOff = 0, spinBase = 0, spd = 1, jumpT = -1, intro = 0;
   const cur = () => { hero.classList.toggle('is-grab', hover && !dragging); hero.classList.toggle('is-grabbing', dragging); };
   const over = (e) => { const r = hero.getBoundingClientRect(); m2.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height * 2 - 1)); ray.setFromCamera(m2, camera); return ray.intersectObject(hit).length > 0; };
   hero.addEventListener('pointermove', (e) => {
@@ -87,15 +118,19 @@
   hero.addEventListener('pointerleave', () => { if (!dragging) { hover = false; cur(); } });
 
   /* ---- API para o site (intro depois do preloader + parallax do scroll) ---- */
-  window.BOWHero = { start() { started = true; }, setProgress(v) { P = v; } };
   setTimeout(() => { started = true; }, 6000);                    // segurança caso não haja preloader
 
-  const clock = new THREE.Clock(); let run = true;
-  document.addEventListener('visibilitychange', () => { run = !document.hidden; clock.getDelta(); });
-  new IntersectionObserver((e) => { run = e[0].isIntersecting && !document.hidden; }).observe(hero);
+  const clock = new THREE.Clock(); let visible = true, frame = 0, warmed = false;
+  const syncLoop = () => {
+    cancelAnimationFrame(frame); frame = 0;
+    clock.getDelta();
+    if (visible && !document.hidden) frame = requestAnimationFrame(loop);
+  };
+  document.addEventListener('visibilitychange', syncLoop);
+  new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncLoop(); }).observe(hero);
 
-  (function loop() {
-    requestAnimationFrame(loop); if (!run) return;
+  function loop() {
+    frame = requestAnimationFrame(loop);
     const dt = Math.min(clock.getDelta(), .05);
     if (started) intro = Math.min(1, intro + dt * .75); const e = 1 - Math.pow(1 - intro, 3);
 
@@ -116,6 +151,9 @@
     shadow.position.set(U.x, U.y + rise - U.size * .6, -.4);
     shadow.scale.set(U.size * .85 * k * Math.max(.45, 1 - lift * 1.6) * (.7 + .3 * e) * (1 - P * .2), U.size * .13, 1);
     shadow.material.opacity = .85 * e * fade * (1 - P * .8);
-    renderer.render(scene, camera);
-  })();
+    // The preloader is opaque. Keep the simulation in sync without redrawing
+    // an invisible canvas; retain full frame rate as soon as the hero starts.
+    if (started || !warmed) { renderer.render(scene, camera); warmed = true; }
+  }
+  syncLoop();
 })();

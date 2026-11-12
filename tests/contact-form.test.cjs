@@ -45,7 +45,7 @@ function openForm(fetchResponse = async () => ({ ok: true, json: async () => ({ 
     FormData: class extends FormData { constructor() { super(); for (const [k,v] of values) this.append(k,v); for (const s of services.filter(s => s.checked)) this.append("Serviços[]", s.value); } },
     fetch: async (url, options) => { requests.push({ url, ...options }); return fetchResponse(url, options); }
   });
-  return { form, services, button, label, status, error, success, again, name, phone, requests, timers,
+  return { form, services, button, label, status, error, success, again, name, phone, requests, timers, values,
     async submit() { const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } }; await form.fire("submit", event); assert.equal(event.defaultPrevented, true, "Must never navigate away"); }
   };
 }
@@ -120,8 +120,28 @@ test("editing phone digits preserves the caret and incomplete numbers cannot sub
   assert.match(formMarkup, /type="tel" name="Celular"[^>]*required/);
 });
 test("WhatsApp remains correct and the confirmation respects reduced motion", () => {
-  const link = new URL(html.match(/class="contact-whatsapp" href="([^"]+)"/)[1]); assert.equal(link.pathname, "/5519998157374");
+  const link = new URL(html.match(/class="whatsapp-float" href="([^"]+)"/)[1]); assert.equal(link.pathname, "/5519998157374");
+  assert.equal(link.search, "");
+  assert.doesNotMatch(html, /class="contact-whatsapp"/);
   assert.doesNotMatch(formMarkup, /web3forms|access_key|your@email.com|_cc/);
   const css = fs.readFileSync(path.join(__dirname, "../css/style.css"), "utf8");
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\.contact-success/);
+});
+
+test("transport excludes credentials, redirects, caching and arbitrary provider fields", async () => {
+  const page = openForm();
+  page.values.set("_cc", "untrusted@example.invalid");
+  page.values.set("_webhook", "https://example.invalid/capture");
+  page.values.set("admin_token", "synthetic-test-value");
+  await page.submit();
+  const request = page.requests[0], data = JSON.parse(request.body);
+  for (const key of ["_cc", "_webhook", "admin_token"]) assert.equal(Object.hasOwn(data, key), false);
+  assert.equal(request.credentials, "omit"); assert.equal(request.cache, "no-store");
+  assert.equal(request.redirect, "error"); assert.equal(request.referrerPolicy, "origin");
+  assert.equal(new URL(request.url).search, "");
+});
+
+test("filled honeypot does not transmit personal data or claim delivery", async () => {
+  const page = openForm(); page.values.set("_honey", "bot"); await page.submit();
+  assert.equal(page.requests.length, 0); assert.equal(page.form.resets, 0); assert.equal(page.success.hidden, true);
 });

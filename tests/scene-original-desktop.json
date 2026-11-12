@@ -1,0 +1,770 @@
+[
+  {
+    "settings": {
+      "dpr": 2,
+      "clear": [
+        0,
+        0
+      ],
+      "toneMapping": 4,
+      "exposure": 1.05,
+      "encoding": 3001,
+      "size": [
+        1350,
+        940
+      ]
+    },
+    "camera": {
+      "fov": 30,
+      "aspect": 1.4361702127659575,
+      "z": 14
+    },
+    "nodes": [
+      {
+        "type": "Scene",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "AmbientLight",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          -4,
+          6,
+          7
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          6,
+          -2,
+          -5
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          2.63986965,
+          -0.016594916,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.00872136,
+          1.00872136,
+          1.00872136
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0.174532925,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          1.673002604,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0.785398163
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshPhysicalMaterial",
+          "color": 789518,
+          "metalness": 0.9,
+          "roughness": 0.2,
+          "clearcoat": 1,
+          "clearcoatRoughness": 0.08,
+          "envMapIntensity": 1.25,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "00d84aa7b6165853f272f1681193f41f9c49961238209331a539e6d5f3f32007",
+          "uv": "47d5e25461807da10fed89d2cbf949d1584bacb67af4ece0e39bf0aa750bbadb",
+          "normal": "bf09a9266192f343c32b848c8fdc01c4a338883513b87c23a3641e5a7b0d0446"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "deae6b37393d1e696513b94d868a725a657913671e5786eca0a712803cd49a08",
+          "normal": "455e9d6e1a3307027cb2fad0f8aeb6c9e4fe68c8b3d2d6e83945a63cb522bbd0",
+          "uv": "86f9f66060cfc55ae3d07f917b7f951a2d6a69839706c2a6ade9f0ae3c9aea39"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          2.63986965,
+          -2.919620009,
+          -0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.467248205,
+          0.616328751,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 0.83323853
+        },
+        "geometry": {
+          "position": "790d89949ccfb2fa2c3a7bb089a2ee773bc38e58b93ddacf647fa0896b103952",
+          "normal": "796f0b940d4268e7d9ccbd67f52dca773c768e372dae64d3c1b1caf59e6c8247",
+          "uv": "f3a0a46301c6859e5b64beadee234c4eeec1dec8c4735dc7bf40ea09e762e189"
+        }
+      }
+    ]
+  },
+  {
+    "settings": {
+      "dpr": 2,
+      "clear": [
+        0,
+        0
+      ],
+      "toneMapping": 4,
+      "exposure": 1.05,
+      "encoding": 3001,
+      "size": [
+        1350,
+        940
+      ]
+    },
+    "camera": {
+      "fov": 30,
+      "aspect": 1.4361702127659575,
+      "z": 14
+    },
+    "nodes": [
+      {
+        "type": "Scene",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "AmbientLight",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          -4,
+          6,
+          7
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          6,
+          -2,
+          -5
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          2.63986965,
+          0.961998833,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.908857945,
+          0.908857945,
+          0.908857945
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0.347320521,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          2.174877604,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0.785398163
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshPhysicalMaterial",
+          "color": 789518,
+          "metalness": 0.9,
+          "roughness": 0.2,
+          "clearcoat": 1,
+          "clearcoatRoughness": 0.08,
+          "envMapIntensity": 1.25,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "00d84aa7b6165853f272f1681193f41f9c49961238209331a539e6d5f3f32007",
+          "uv": "47d5e25461807da10fed89d2cbf949d1584bacb67af4ece0e39bf0aa750bbadb",
+          "normal": "bf09a9266192f343c32b848c8fdc01c4a338883513b87c23a3641e5a7b0d0446"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "deae6b37393d1e696513b94d868a725a657913671e5786eca0a712803cd49a08",
+          "normal": "455e9d6e1a3307027cb2fad0f8aeb6c9e4fe68c8b3d2d6e83945a63cb522bbd0",
+          "uv": "86f9f66060cfc55ae3d07f917b7f951a2d6a69839706c2a6ade9f0ae3c9aea39"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          2.63986965,
+          -1.929279794,
+          -0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          2.462579868,
+          0.616328751,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 0.468500547
+        },
+        "geometry": {
+          "position": "790d89949ccfb2fa2c3a7bb089a2ee773bc38e58b93ddacf647fa0896b103952",
+          "normal": "796f0b940d4268e7d9ccbd67f52dca773c768e372dae64d3c1b1caf59e6c8247",
+          "uv": "f3a0a46301c6859e5b64beadee234c4eeec1dec8c4735dc7bf40ea09e762e189"
+        }
+      }
+    ]
+  },
+  {
+    "settings": {
+      "dpr": 2,
+      "clear": [
+        0,
+        0
+      ],
+      "toneMapping": 4,
+      "exposure": 1.05,
+      "encoding": 3001,
+      "size": [
+        1350,
+        940
+      ]
+    },
+    "camera": {
+      "fov": 30,
+      "aspect": 1.4361702127659575,
+      "z": 14
+    },
+    "nodes": [
+      {
+        "type": "Scene",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "AmbientLight",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          -4,
+          6,
+          7
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "DirectionalLight",
+        "position": [
+          6,
+          -2,
+          -5
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          2.63986965,
+          0.940957234,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          0.908857945,
+          0.908857945,
+          0.908857945
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0.360854049,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          8.007114525,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Group",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0.785398163
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshPhysicalMaterial",
+          "color": 789518,
+          "metalness": 0.9,
+          "roughness": 0.2,
+          "clearcoat": 1,
+          "clearcoatRoughness": 0.08,
+          "envMapIntensity": 1.25,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "00d84aa7b6165853f272f1681193f41f9c49961238209331a539e6d5f3f32007",
+          "uv": "47d5e25461807da10fed89d2cbf949d1584bacb67af4ece0e39bf0aa750bbadb",
+          "normal": "bf09a9266192f343c32b848c8fdc01c4a338883513b87c23a3641e5a7b0d0446"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 1
+        },
+        "geometry": {
+          "position": "deae6b37393d1e696513b94d868a725a657913671e5786eca0a712803cd49a08",
+          "normal": "455e9d6e1a3307027cb2fad0f8aeb6c9e4fe68c8b3d2d6e83945a63cb522bbd0",
+          "uv": "86f9f66060cfc55ae3d07f917b7f951a2d6a69839706c2a6ade9f0ae3c9aea39"
+        }
+      },
+      {
+        "type": "Mesh",
+        "position": [
+          2.63986965,
+          -1.929279794,
+          -0.4
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "scale": [
+          1.44629562,
+          0.616328751,
+          1
+        ],
+        "material": {
+          "type": "MeshBasicMaterial",
+          "color": 16777215,
+          "opacity": 0.471880702
+        },
+        "geometry": {
+          "position": "790d89949ccfb2fa2c3a7bb089a2ee773bc38e58b93ddacf647fa0896b103952",
+          "normal": "796f0b940d4268e7d9ccbd67f52dca773c768e372dae64d3c1b1caf59e6c8247",
+          "uv": "f3a0a46301c6859e5b64beadee234c4eeec1dec8c4735dc7bf40ea09e762e189"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "file": "js/vendor/three-0.128.0.min.js",
+    "integrity": "sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu",
+    "url": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"
+  },
+  {
+    "file": "js/vendor/gsap-3.15.1.min.js",
+    "integrity": "sha384-3vCAhD+a3BOliP3QqjQINn6ZWiZxoqu0WFxX5ZQZgqekDZuSb1mJBrrLMmu94H8f",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/gsap.min.js"
+  },
+  {
+    "file": "js/vendor/DrawSVGPlugin-3.15.1.min.js",
+    "integrity": "sha384-fynVx3iMchteqKcx/rkUAX8fWugxllTPhisYGTDw03tf1trspBGOvlurai60MD4A",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/DrawSVGPlugin.min.js"
+  },
+  {
+    "file": "js/vendor/ScrollTrigger-3.15.1.min.js",
+    "integrity": "sha384-H2WL1iy/jKQQ7MTHU2hskZKNHTYWWD/KgKE1vCNnaWY8An2ESTh23KN/fTp8XS3j",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollTrigger.min.js"
+  },
+  {
+    "file": "js/vendor/ScrollToPlugin-3.15.1.min.js",
+    "integrity": "sha384-q1Y74vO1m3eJZX6pQt3gbZym/G34NeI0c5b/PkhvTsiihEqc0ZEomVbS+ThTDjKE",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/ScrollToPlugin.min.js"
+  },
+  {
+    "file": "js/vendor/SplitText-3.15.1.min.js",
+    "integrity": "sha384-e98MX/fxZrUXA/6T+aCptryLfHgR2FpEmWxDbbPloHT0Qg79dEXKdLJ/iwD2lzxs",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.1/dist/SplitText.min.js"
+  }
+]
