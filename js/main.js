@@ -261,21 +261,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   function initNavbar() {
     const nav = document.querySelector(".navbar");
     const sections = [...document.querySelectorAll("main > section[data-theme]")];
-    let positions = [], probe = 39, frame = 0;
+    let probe = 39, frame = 0;
     const measure = () => {
       probe = Math.min(window.innerHeight - 1, Math.max(1, nav.getBoundingClientRect().height * .5));
-      const y = window.scrollY;
-      positions = sections.map(section => {
-        const rect = section.getBoundingClientRect();
-        return { top: rect.top + y, bottom: rect.bottom + y, theme: section.dataset.theme };
-      });
       update();
     };
     const update = () => {
       frame = 0;
-      const y = window.scrollY + probe;
-      const current = positions.findLast(section => section.top <= y && section.bottom > y);
-      nav.classList.toggle("is-dark", current?.theme !== "light");
+      // The sticky hero moves relative to the document. Read viewport bounds
+      // on each update; later sections cover it as they scroll over it.
+      const current = sections.findLast(section => {
+        const rect = section.getBoundingClientRect();
+        return rect.top <= probe && rect.bottom > probe;
+      });
+      nav.classList.toggle("is-dark", current?.dataset.theme !== "light");
     };
     measure();
     window.addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(update); }, { passive: true });

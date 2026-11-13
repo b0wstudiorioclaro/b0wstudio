@@ -7,6 +7,39 @@ const source = fs.readFileSync(path.join(__dirname, '../js/main.js'), 'utf8');
 const helpers = source.slice(source.indexOf('  function isolateDialog('), source.indexOf('  function initFloatingWhatsApp('));
 const legal = source.slice(source.indexOf('  function initLegalAndCookieModals()'), source.indexOf('  function setupCanvas('));
 const mobile = source.slice(source.indexOf('  function initMobileMenu()'), source.indexOf('  function initHero()'));
+const navbar = source.slice(source.indexOf('  function initNavbar()'), source.indexOf('  function initMobileMenu()'));
+
+for (const height of [900, 700]) {
+  test(`navbar restores black on the sticky hero after a footer refresh (${height}px viewport)`, () => {
+    const listeners = {}, refresh = {}, frames = [];
+    let dark = false, click;
+    const window = { scrollY: 0, innerHeight: height, addEventListener: (name, fn) => { listeners[name] = fn; },
+      ScrollTrigger: { addEventListener: (name, fn) => { refresh[name] = fn; } },
+      scrollTo: ({ top }) => { window.scrollY = top; listeners.scroll(); } };
+    const hero = { dataset: { theme: 'light' }, getBoundingClientRect: () => ({ top: 0, bottom: height }),
+      hasAttribute: () => true, focus() {} };
+    const section = (top, theme) => ({ dataset: { theme }, getBoundingClientRect: () => ({ top: top - window.scrollY, bottom: top + height - window.scrollY }) });
+    const sections = [hero, section(height, 'dark'), section(height * 2, 'light'), section(height * 3, 'dark')];
+    const nav = { getBoundingClientRect: () => ({ height: 78 }), classList: { toggle: (_, value) => { dark = value; } } };
+    const link = { getAttribute: () => '#inicio', addEventListener: (_, fn) => { click = fn; } };
+    const document = { querySelector: () => nav, querySelectorAll: selector => selector.startsWith('main') ? sections : [link], getElementById: () => hero };
+    const flush = () => { while (frames.length) frames.shift()(); };
+    const scroll = y => { window.scrollY = y; listeners.scroll(); flush(); };
+    vm.runInNewContext(`${navbar}\ninitNavbar();`, { window, document, hasGSAP: false, reduceMotion: false,
+      requestAnimationFrame: fn => { frames.push(fn); return frames.length; } });
+    assert.equal(dark, false, 'black navigation on the initial hero');
+    scroll(height); assert.equal(dark, true, 'white navigation over a dark section covering the hero');
+    scroll(height * 2); assert.equal(dark, false, 'black navigation over a light section');
+    scroll(height * 3); assert.equal(dark, true, 'white navigation at the footer');
+    refresh.refresh();
+    scroll(0); assert.equal(dark, false, 'manual return stays black after refreshing at the footer');
+    scroll(height * 3); listeners.resize();
+    click({ preventDefault() {} }); flush();
+    assert.equal(window.scrollY, 0);
+    assert.equal(dark, false, 'home link restores black after resizing at the footer');
+  });
+}
+
 function environment() {
   let doc;
   class Element {
